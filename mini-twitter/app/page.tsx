@@ -1,7 +1,8 @@
-import { LeftSidebar } from "@/components/organisms/left-sidebar";
-import { TopBar } from "@/components/organisms/top-bar";
-import { CreatePostBox } from "@/components/molecules/create-post-box";
-import { PostCard } from "@/components/organisms/post-card";
+import { LeftSidebar } from "../components/organisms/left-sidebar";
+import { TopBar } from "../components/organisms/top-bar";
+import { CreatePostBox } from "../components/molecules/create-post-box";
+import { AppShell } from "../components/organisms/app-shell";
+import { PostCard } from "../components/organisms/post-card";
 
 export default function Page() {
   return (
