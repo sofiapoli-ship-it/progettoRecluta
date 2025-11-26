@@ -1,63 +1,90 @@
 import Link from "next/link";
-import { Home, Heart, User, LogOut, PenSquare } from "lucide-react";
+import { Pencil, Home, Heart, User, LogOut } from "lucide-react";
 
-type AppSidebarProps = {
+type Props = {
   active?: "home" | "likes" | "profile";
 };
 
-export function AppSidebar({ active = "home" }: AppSidebarProps) {
-  // per ora dati finti, poi li prenderemo dall'API profilo
-  const username = "sofia";
-  const email = "sofia@poli.com";
-
-  const baseItem =
-    "flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition";
-  const inactive = baseItem + " text-neutral-200 hover:bg-[#111827]";
-  const activeClass = baseItem + " bg-[#0b1730] text-white";
-
+export function AppSidebar({ active = "home" }: Props) {
   return (
-    <aside className="hidden md:flex flex-col justify-between border-r border-[#111827] px-8 py-10 w-[280px] min-h-screen bg-[#020617]">
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">MiniTwitter</h1>
+    <aside className="hidden md:flex flex-col justify-between bg-[#0D1220] text-white h-screen w-[260px] px-6 py-8 border-r border-[#111827]">
+      
+      {/* ---- TOP PART ---- */}
+      <div className="flex flex-col gap-8">
+        {/* Logo */}
+        <h1 className="text-2xl font-extrabold text-white">MiniTwitter</h1>
 
-        <div className="space-y-1 text-sm text-neutral-400">
-          <p className="font-semibold text-white">@{username}</p>
-          <p>{email}</p>
+        {/* User Info */}
+        <div>
+          <p className="font-semibold">@sofia</p>
+          <p className="text-sm text-neutral-400">sofia@poli.com</p>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 py-2 rounded-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium transition">
-          <PenSquare size={18} />
-          <span>Nuovo Post</span>
-        </button>
+        {/* New Post Button */}
+        <Link
+          href="/post"
+          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] transition text-white font-semibold py-3 rounded-full"
+        >
+          <Pencil size={18} /> Nuovo Post
+        </Link>
 
-        <nav className="mt-4 space-y-2 text-sm">
-          <Link href="/" className={active === "home" ? activeClass : inactive}>
-            <Home size={18} />
-            <span>Home</span>
-          </Link>
-
-          <Link
+        {/* Menu Links */}
+        <nav className="flex flex-col gap-2 mt-2 text-neutral-300">
+          <SidebarItem
+            href="/"
+            label="Home"
+            icon={<Home size={20} />}
+            active={active === "home"}
+          />
+          <SidebarItem
             href="/likes"
-            className={active === "likes" ? activeClass : inactive}
-          >
-            <Heart size={18} />
-            <span>Likes</span>
-          </Link>
-
-          <Link
+            label="Likes"
+            icon={<Heart size={20} />}
+            active={active === "likes"}
+          />
+          <SidebarItem
             href="/profile"
-            className={active === "profile" ? activeClass : inactive}
-          >
-            <User size={18} />
-            <span>Profile</span>
-          </Link>
+            label="Profile"
+            icon={<User size={20} />}
+            active={active === "profile"}
+          />
         </nav>
       </div>
 
-      <button className="flex items-center gap-2 text-sm text-neutral-400 hover:text-red-400 transition">
-        <LogOut size={16} />
-        <span>Esci</span>
+      {/* ---- BOTTOM PART ---- */}
+      <button className="flex items-center gap-2 text-neutral-400 hover:text-white transition">
+        <LogOut size={18} /> Esci
       </button>
+
     </aside>
+  );
+}
+
+type SidebarItemProps = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  active: boolean;
+};
+
+function SidebarItem({ href, label, icon, active }: SidebarItemProps) {
+  return (
+    <Link href={href} className="block">
+      <div
+        className={`
+          flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition
+          ${active 
+            ? "bg-[#0E1A36] text-[#3B82F6]" 
+            : "text-neutral-300 hover:bg-[#0E1A2A] hover:text-white"
+          }
+        `}
+      >
+        <div className={active ? "text-[#3B82F6]" : "text-neutral-400"}>
+          {icon}
+        </div>
+
+        <span className="text-[17px] font-medium">{label}</span>
+      </div>
+    </Link>
   );
 }

@@ -1,29 +1,65 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar } from "../atoms/avatar";
+import { Heart, MessageCircle } from "lucide-react";
 
-export function PostCard({ username, handle, content, time, likes, comments }: any) {
+type Props = {
+  username: string;
+  handle: string;
+  content: string;
+  likes: number;
+  comments: number;
+};
+
+function formatDate(date: Date) {
+  return date.toLocaleString("it-IT", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+export function PostCard({
+  username,
+  handle,
+  content,
+  likes,
+  comments,
+}: Props) {
   return (
-    <Card className="bg-black border-b border-neutral-800 rounded-none">
-      <CardContent className="p-4 space-y-3">
-        <div className="flex gap-3">
-          <Avatar size={42} />
+    <article className="border-b border-[#1a1f2e] py-5 px-4 hover:bg-[#111627] transition-colors">
+      
+      {/* HEADER */}
+      <header className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-neutral-600"></div>
 
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">{username}</span>
-              <span className="text-neutral-500">@{handle}</span>
-              <span className="text-neutral-500">· {time}</span>
-            </div>
-
-            <p className="text-neutral-200">{content}</p>
-
-            <div className="flex gap-6 text-neutral-500 text-sm pt-3">
-              <button>❤️ {likes}</button>
-              <button>💬 {comments}</button>
-            </div>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-white">{username}</span>
+            <span className="text-neutral-400">{handle}</span>
+            <span className="text-neutral-500">·</span>
+            <span className="text-neutral-500">
+              {formatDate(new Date())}
+            </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </header>
+
+      {/* CONTENT */}
+      <p className="text-neutral-200 mt-3 mb-4 whitespace-pre-line">
+        {content}
+      </p>
+
+      {/* FOOTER */}
+      <footer className="flex items-center gap-6 text-neutral-400 text-sm">
+        
+        <div className="flex items-center gap-1 hover:text-red-500 cursor-pointer transition">
+          <Heart size={16} /> {likes}
+        </div>
+
+        <div className="flex items-center gap-1 hover:text-blue-400 cursor-pointer transition">
+          <MessageCircle size={16} /> {comments}
+        </div>
+      </footer>
+
+    </article>
   );
 }
