@@ -1,84 +1,75 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { apiLogin } from "@/lib/api";
 
 export default function LoginPage() {
-  const router = useRouter();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function handleLogin() {
-    setError("");
-    setLoading(true);
-
-    try {
-      const response = await apiLogin(username, password);
-      const tempToken = response.temporaryToken;
-
-      // salva token temporaneo
-      localStorage.setItem("tempToken", tempToken);
-
-      // vai alla pagina OTP
-      router.push("/verify");
-    } catch (err) {
-      setError("Credenziali non valide");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm bg-neutral-900 border-neutral-800">
-        <CardContent className="p-6 space-y-6">
-          
-          <h1 className="text-2xl font-bold text-center mb-4">Accedi</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0F1C] px-4">
+      <div className="bg-[#0F1629] border border-[#1f273a] rounded-xl p-8 w-full max-w-md text-white">
 
-          <div className="space-y-4">
-            <Input 
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="bg-neutral-800 border-neutral-700 text-white"
-            />
+        {/* Logo */}
+        <h1 className="text-3xl font-bold text-center mb-6">MiniTwitter</h1>
 
-            <Input 
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-neutral-800 border-neutral-700 text-white"
-            />
-          </div>
+        {/* Title */}
+        <h2 className="text-2xl font-semibold mb-1">Accedi al tuo account</h2>
+        <p className="text-neutral-400 mb-6 text-sm">
+          Inserisci le tue credenziali per continuare.
+        </p>
 
-          {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
-          )}
+        {/* Username */}
+        <label className="text-sm font-medium text-neutral-300">
+          Username
+        </label>
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="
+            w-full mt-1 mb-5 bg-[#111827] border border-[#1e2537]
+            rounded-lg px-3 py-2 text-neutral-200 outline-none
+            focus:border-blue-500
+          "
+          type="text"
+          placeholder="Il tuo username"
+        />
 
-          <Button 
-            className="w-full"
-            onClick={handleLogin}
-            disabled={loading}
-          >
-            {loading ? "Attendere..." : "Continua"}
-          </Button>
+        {/* Password */}
+        <label className="text-sm font-medium text-neutral-300">
+          Password
+        </label>
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="
+            w-full mt-1 mb-6 bg-[#111827] border border-[#1e2537]
+            rounded-lg px-3 py-2 text-neutral-200 outline-none
+            focus:border-blue-500
+          "
+          type="password"
+          placeholder="••••••••"
+        />
 
-          <p className="text-sm text-neutral-400 text-center pt-2">
-            Non hai un account?{" "}
-            <a href="/signup" className="text-blue-400 hover:underline">
-              Registrati
-            </a>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+        {/* Button */}
+        <button
+          className="
+            w-full bg-[#3B82F6] hover:bg-[#2563EB] transition
+            text-white font-semibold py-2 rounded-full
+          "
+        >
+          Continua
+        </button>
+
+        {/* Signup Link */}
+        <p className="text-sm text-neutral-400 mt-6 text-center">
+          Non hai un account?{" "}
+          <Link href="/signup" className="text-blue-400 hover:underline">
+            Registrati
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -7,29 +7,33 @@ type Props = {
 
 export function AppSidebar({ active = "home" }: Props) {
   return (
-    <aside className="hidden md:flex flex-col justify-between bg-[#0D1220] text-white h-screen w-[260px] px-6 py-8 border-r border-[#111827]">
-      
-      {/* ---- TOP PART ---- */}
+    <aside className="hidden md:flex flex-col justify-between bg-[#0E1424] text-white h-screen w-[260px] px-6 py-8 border-r border-[#1F2937]">
+
+      {/* --- TOP --- */}
       <div className="flex flex-col gap-8">
+        
         {/* Logo */}
-        <h1 className="text-2xl font-extrabold text-white">MiniTwitter</h1>
+        <h1 className="text-2xl font-extrabold">MiniTwitter</h1>
 
         {/* User Info */}
-        <div>
-          <p className="font-semibold">@sofia</p>
-          <p className="text-sm text-neutral-400">sofia@poli.com</p>
+        <div className="flex flex-col">
+          <span className="font-semibold text-[16px]">@sofia</span>
+          <span className="text-[#9CA3AF] text-[14px] leading-tight">
+            sofia@poli.com
+          </span>
         </div>
 
         {/* New Post Button */}
         <Link
           href="/post"
-          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] transition text-white font-semibold py-3 rounded-full"
+          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] transition text-white font-semibold py-3 rounded-full text-[15px]"
         >
-          <Pencil size={18} /> Nuovo Post
+          <Pencil size={18} />
+          Nuovo Post
         </Link>
 
-        {/* Menu Links */}
-        <nav className="flex flex-col gap-2 mt-2 text-neutral-300">
+        {/* Navigation */}
+        <nav className="flex flex-col gap-2 mt-2">
           <SidebarItem
             href="/"
             label="Home"
@@ -51,9 +55,10 @@ export function AppSidebar({ active = "home" }: Props) {
         </nav>
       </div>
 
-      {/* ---- BOTTOM PART ---- */}
-      <button className="flex items-center gap-2 text-neutral-400 hover:text-white transition">
-        <LogOut size={18} /> Esci
+      {/* --- BOTTOM LOGOUT --- */}
+      <button className="flex items-center gap-2 text-[#9CA3AF] hover:text-white transition text-[15px]">
+        <LogOut size={18} />
+        Esci
       </button>
 
     </aside>
@@ -73,17 +78,16 @@ function SidebarItem({ href, label, icon, active }: SidebarItemProps) {
       <div
         className={`
           flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition
-          ${active 
-            ? "bg-[#0E1A36] text-[#3B82F6]" 
-            : "text-neutral-300 hover:bg-[#0E1A2A] hover:text-white"
-          }
+          ${active
+            ? "bg-[#0E1A36] text-[#3B82F6]"
+            : "text-[#9CA3AF] hover:bg-[#0E1A2A] hover:text-white"}
         `}
       >
-        <div className={active ? "text-[#3B82F6]" : "text-neutral-400"}>
+        <div className={active ? "text-[#3B82F6]" : "text-[#9CA3AF]"}>
           {icon}
         </div>
 
-        <span className="text-[17px] font-medium">{label}</span>
+        <span className="text-[16px] font-medium">{label}</span>
       </div>
     </Link>
   );

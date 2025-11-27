@@ -2,18 +2,17 @@ import { AppShell } from "@/components/organisms/app-shell";
 
 export default function LikesPage() {
   return (
-    <AppShell active="likes" title="I tuoi Mi Piace">
-      <div className="flex flex-col items-center justify-center text-center py-20">
+    <AppShell active="likes" title="I tuoi Mi piace">
 
-        <p className="text-neutral-400 text-lg mb-2">
+      <div className="max-w-2xl mx-auto text-center mt-16">
+        <h2 className="text-xl font-semibold text-white mb-2">
           Ancora nessun like ricevuto
-        </p>
-
-        <p className="text-neutral-600 text-sm">
+        </h2>
+        <p className="text-neutral-400">
           I like che ricevi ai tuoi post appariranno qui.
         </p>
-        
       </div>
+
     </AppShell>
   );
 }
