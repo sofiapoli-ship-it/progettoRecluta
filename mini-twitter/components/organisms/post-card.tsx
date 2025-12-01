@@ -3,7 +3,7 @@ import { Heart, MessageCircle } from "lucide-react";
 type Props = {
   username: string;
   handle: string;
-  time: Date | null;
+  time: string | Date;     // ← CORRETTO QUI
   content: string;
   likes: number;
   comments: number;
@@ -12,15 +12,22 @@ type Props = {
 export function PostCard({
   username,
   handle,
-  time,
   content,
+  time,
   likes,
   comments,
 }: Props) {
-  
-  // Se la data non esiste → mostriamo solo "—"
-  const formattedTime = time
-    ? time.toLocaleString("it-IT", {
+
+  // Conversione sicura della data
+  const date =
+    typeof time === "string"
+      ? new Date(time)
+      : time instanceof Date
+      ? time
+      : null;
+
+  const formattedTime = date
+    ? date.toLocaleString("it-IT", {
         day: "2-digit",
         month: "short",
         hour: "2-digit",
@@ -29,36 +36,36 @@ export function PostCard({
     : "—";
 
   return (
-    <article className="border-b border-[#1F2937] py-5 px-4 hover:bg-[#111827] transition">
+    <div className="w-full py-5 px-2 rounded-xl bg-[#111827]/20 hover:bg-[#111827]/30 transition">
 
       {/* HEADER */}
       <div className="flex items-start gap-3">
 
-        {/* Avatar */}
         <div className="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center text-white font-semibold text-sm">
-          {username[0]?.toUpperCase()}
+          {username[0].toUpperCase()}
         </div>
 
-        {/* USER INFO */}
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-white text-[15px]">{username}</span>
-            <span className="text-neutral-400 text-[14px]">@{handle}</span>
-            <span className="text-neutral-500 text-[14px]">· {formattedTime}</span>
-          </div>
+        <div className="flex flex-col leading-tight">
+          <span className="font-semibold text-[15px] text-white">
+            {username}
+          </span>
+          <span className="text-neutral-400 text-[13px]">
+            {handle}
+          </span>
+          <span className="text-neutral-500 text-[12px]">
+            {formattedTime}
+          </span>
         </div>
 
       </div>
 
-      {/* CONTENT */}
-      <p className="text-neutral-200 text-[15px] mt-4 mb-4 ml-1 whitespace-pre-line">
+      <p className="text-neutral-200 text-[15px] mt-4 mb-4 ml-1">
         {content}
       </p>
 
-      {/* FOOTER */}
-      <div className="flex items-center gap-8 text-[#9CA3AF] text-sm ml-1">
+      <div className="flex items-center gap-8 text-[#9CA3AF] text-[14px] ml-1">
 
-        <div className="flex items-center gap-1 hover:text-red-400 transition cursor-pointer">
+        <div className="flex items-center gap-1 hover:text-pink-400 transition cursor-pointer">
           <Heart size={17} />
           <span>{likes}</span>
         </div>
@@ -70,6 +77,6 @@ export function PostCard({
 
       </div>
 
-    </article>
+    </div>
   );
 }

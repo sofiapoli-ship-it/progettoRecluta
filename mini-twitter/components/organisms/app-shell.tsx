@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./app-sidebar";
+import { TopBar } from "./top-bar";
 
 type Props = {
   children: ReactNode;
-  active?: "home" | "likes" | "profile";
+  active?: "home" | "likes" | "profile"; // ❗ niente null
   title?: string;
 };
 
@@ -17,21 +18,16 @@ export function AppShell({ children, active = "home", title }: Props) {
       </div>
 
       {/* Main area */}
-      <section className="text-white border-l border-[#0F1629]">
+      <main className="text-white min-h-screen bg-[#020617]">
 
-        {/* Top Title */}
-        {title && (
-          <div className="border-b border-[#1a1f2e] px-6 py-4 sticky top-0 bg-[#020617] z-10">
-            <h2 className="text-lg font-semibold">{title}</h2>
-          </div>
-        )}
+        {/* Top Bar */}
+        <TopBar title={title ?? ""} />
 
-        {/* Feed Container */}
-        <div className="px-4 py-6 max-w-[620px] mx-auto">
+        {/* Page Content */}
+        <div className="px-4 py-6 max-w-[650px] mx-auto">
           {children}
         </div>
-
-      </section>
+      </main>
     </div>
   );
 }

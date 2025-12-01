@@ -1,44 +1,52 @@
 "use client";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { useState } from "react";
+import { AppShell } from "@/components/organisms/app-shell";
 
 export default function CreatePostPage() {
-  const [text, setText] = useState("");
+  const [content, setContent] = useState("");
 
   return (
     <AppShell active="home" title="Crea un nuovo post">
-      <p className="text-neutral-400 mb-6">
-        Condividi i tuoi pensieri con la community
-      </p>
+      <div className="max-w-[650px] mx-auto mt-6">
 
-      <div className="bg-[#0F1629] border border-[#1e2537] rounded-xl p-6 max-w-2xl mx-auto">
-        {/* TEXTAREA */}
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Cosa stai pensando?"
-          className="
-            w-full h-40 bg-transparent resize-none outline-none
-            text-neutral-200 placeholder-neutral-500
-          "
-        />
-
-        {/* INFO */}
-        <p className="text-neutral-500 text-sm mt-2">
-          Supporta Markdown: <b>**grassetto**</b>, <i>_corsivo_</i>, liste, ecc.
+        {/* Subtitle */}
+        <p className="text-neutral-400 mb-6">
+          Condividi i tuoi pensieri con la community
         </p>
 
-        {/* BUTTON */}
-        <div className="flex justify-end mt-6">
-          <button
+        {/* Post box container */}
+        <div className="bg-[#0b1120] border border-[#1f2937] rounded-xl p-6">
+          
+          {/* Textarea */}
+          <textarea
             className="
-              bg-[#3B82F6] hover:bg-[#2563EB] transition
-              text-white font-semibold px-6 py-2 rounded-full
+              w-full h-[160px] bg-transparent resize-none outline-none
+              text-white placeholder-neutral-500 text-[16px]
             "
-          >
-            Pubblica
-          </button>
+            placeholder="Cosa stai pensando?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+
+          {/* Markdown help */}
+          <p className="text-neutral-500 text-sm mt-1 mb-4">
+            Supporta Markdown: <b>**grassetto**</b>, <i>_corsivo_</i>, liste, ecc.
+          </p>
+
+          {/* Publish button */}
+          <div className="flex justify-end">
+            <button
+              disabled={content.trim().length === 0}
+              className="
+                px-5 py-2 rounded-lg 
+                bg-blue-600 text-white font-medium 
+                disabled:opacity-40 disabled:cursor-not-allowed
+              "
+            >
+              Pubblica
+            </button>
+          </div>
         </div>
       </div>
     </AppShell>

@@ -2,50 +2,48 @@ import Link from "next/link";
 import { Pencil, Home, Heart, User, LogOut } from "lucide-react";
 
 type Props = {
-  active?: "home" | "likes" | "profile";
+  active?: "home" | "likes" | "profile" | null; // ⭐ SUPPORTA NULL
 };
 
-export function AppSidebar({ active = "home" }: Props) {
+export function AppSidebar({ active = null }: Props) {
   return (
-    <aside className="hidden md:flex flex-col justify-between bg-[#0E1424] text-white h-screen w-[260px] px-6 py-8 border-r border-[#1F2937]">
-
-      {/* --- TOP --- */}
+    <aside className="hidden md:flex flex-col justify-between h-screen w-[260px] px-6 py-8 border-r border-[#1F2937] bg-[#020617] text-white">
+      
+      {/* ---- TOP PART ---- */}
       <div className="flex flex-col gap-8">
-        
         {/* Logo */}
-        <h1 className="text-2xl font-extrabold">MiniTwitter</h1>
+        <h1 className="text-2xl font-extrabold text-white">MiniTwitter</h1>
 
         {/* User Info */}
-        <div className="flex flex-col">
-          <span className="font-semibold text-[16px]">@sofia</span>
-          <span className="text-[#9CA3AF] text-[14px] leading-tight">
-            sofia@poli.com
-          </span>
+        <div>
+          <p className="font-semibold">@sofia</p>
+          <p className="text-sm text-neutral-400">sofia@poli.com</p>
         </div>
 
         {/* New Post Button */}
         <Link
           href="/post"
-          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] transition text-white font-semibold py-3 rounded-full text-[15px]"
+          className="flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] transition text-white font-semibold py-3 rounded-full"
         >
-          <Pencil size={18} />
-          Nuovo Post
+          <Pencil size={18} /> Nuovo Post
         </Link>
 
-        {/* Navigation */}
-        <nav className="flex flex-col gap-2 mt-2">
+        {/* Menu Links */}
+        <nav className="flex flex-col gap-2 mt-2 text-neutral-300">
           <SidebarItem
             href="/"
             label="Home"
             icon={<Home size={20} />}
             active={active === "home"}
           />
+
           <SidebarItem
             href="/likes"
             label="Likes"
             icon={<Heart size={20} />}
             active={active === "likes"}
           />
+
           <SidebarItem
             href="/profile"
             label="Profile"
@@ -55,10 +53,9 @@ export function AppSidebar({ active = "home" }: Props) {
         </nav>
       </div>
 
-      {/* --- BOTTOM LOGOUT --- */}
-      <button className="flex items-center gap-2 text-[#9CA3AF] hover:text-white transition text-[15px]">
-        <LogOut size={18} />
-        Esci
+      {/* ---- BOTTOM PART ---- */}
+      <button className="flex items-center gap-2 text-neutral-400 hover:text-white transition">
+        <LogOut size={18} /> Esci
       </button>
 
     </aside>
@@ -74,20 +71,25 @@ type SidebarItemProps = {
 
 function SidebarItem({ href, label, icon, active }: SidebarItemProps) {
   return (
-    <Link href={href} className="block">
+    <Link href={href}>
       <div
-        className={`
-          flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition
-          ${active
-            ? "bg-[#0E1A36] text-[#3B82F6]"
-            : "text-[#9CA3AF] hover:bg-[#0E1A2A] hover:text-white"}
+        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition cursor-pointer
+          ${
+            active
+              ? "bg-[#0F1A2F] text-[#3B82F6]"   // ⭐ testo blu
+              : "text-white hover:bg-[#1E293B] hover:text-white"
+          }
         `}
       >
-        <div className={active ? "text-[#3B82F6]" : "text-[#9CA3AF]"}>
+        {/* Icona: blu se attivo, bianca se non attivo */}
+        <span className={active ? "text-[#3B82F6]" : "text-white"}>
           {icon}
-        </div>
+        </span>
 
-        <span className="text-[16px] font-medium">{label}</span>
+        {/* Testo */}
+        <span className={`text-base ${active ? "text-[#3B82F6]" : "text-white"}`}>
+          {label}
+        </span>
       </div>
     </Link>
   );

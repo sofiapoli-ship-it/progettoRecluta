@@ -1,74 +1,132 @@
 "use client";
 
 import { AppShell } from "@/components/organisms/app-shell";
-import { useAuth } from "@/contexts/auth";
-import { Pencil, LogOut } from "lucide-react";
+
+const mockMyUser = {
+  username: "sofia",
+  email: "sofia@poli.com",
+  bio: "",
+  createdAt: "2024-09-10T00:00:00Z",
+};
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const user = mockMyUser;
 
   return (
-    <AppShell title="Profilo" active="profile">
-      <div className="max-w-3xl mx-auto pt-6">
+    <AppShell active="profile" title="Profilo">
+      <div className="max-w-[750px] mx-auto px-4">
 
-        {/* CARD PROFILO */}
-        <div className="bg-[#0F172A] border border-[#1E293B] shadow-lg rounded-2xl p-8 mb-14">
-
-          {/* TITOLO */}
-          <h2 className="text-xl font-semibold text-white mb-1">
+        {/* ==== CARD PROFILO ==== */}
+        <div className="
+          bg-[#0B0F1A]
+          border border-[#1C2333]
+          rounded-2xl
+          px-8 py-10
+          shadow-[0_0_30px_rgba(0,0,0,0.25)]
+        ">
+          <h2 className="text-[22px] font-semibold text-white">
             Informazioni utente
           </h2>
-          <p className="text-sm text-[#94A3B8] mb-6">I tuoi dati personali</p>
 
-          {/* USER INFO */}
-          <div className="space-y-3">
-            <p className="text-[#E2E8F0]">
-              <span className="font-semibold">Username: </span>@{user.username}
-            </p>
+          <p className="text-[14px] text-neutral-400 mt-1 mb-8">
+            I tuoi dati personali
+          </p>
 
-            <p className="text-[#E2E8F0]">
-              <span className="font-semibold">Email: </span>{user.email}
-            </p>
+          <div className="space-y-6 text-[15px]">
+            
+            {/* Username */}
+            <div className="flex flex-col gap-1">
+              <span className="text-neutral-400 text-[14px]">Username</span>
+              <span className="text-neutral-100 font-medium text-[16px]">
+                @{user.username}
+              </span>
+            </div>
 
-            <p className="text-[#E2E8F0]">
-              <span className="font-semibold">Bibliografia/Bio: </span>
-              <span className="italic text-[#94A3B8]">
-                Nessuna bio aggiunta.
-              </span>{" "}
-              <a
-                href="#"
-                className="text-[#3B82F6] hover:underline font-medium"
-              >
-                Aggiungine una!
-              </a>
-            </p>
+            {/* Email */}
+            <div className="flex flex-col gap-1">
+              <span className="text-neutral-400 text-[14px]">Email</span>
+              <span className="text-neutral-100 font-medium text-[16px]">
+                {user.email}
+              </span>
+            </div>
+
+            {/* Bio */}
+            <div className="flex flex-col gap-1">
+              <span className="text-neutral-400 text-[14px]">Bibliografia/Bio</span>
+
+              {user.bio ? (
+                <span className="text-neutral-100">{user.bio}</span>
+              ) : (
+                <span className="text-neutral-500 italic">
+                  Nessuna bio aggiunta.{" "}
+                  <span className="text-[#3B82F6] hover:underline cursor-pointer not-italic">
+                    Aggiungine una!
+                  </span>
+                </span>
+              )}
+            </div>
+
           </div>
 
           {/* BOTTONI */}
-          <div className="mt-8 flex flex-col gap-3">
-            <button className="w-full flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white py-3.5 rounded-full font-medium text-[15px] transition">
-              <Pencil size={18} />
-              Modifica profilo
+          <div className="flex flex-col gap-4 mt-10">
+
+            <button className="
+              w-full
+              py-3.5
+              rounded-full
+              bg-[#3B82F6]
+              hover:bg-[#2F6ADF]
+              text-white
+              text-[15px]
+              font-medium
+              transition
+            ">
+              ✏️ Modifica profilo
             </button>
 
-            <button className="w-full flex items-center justify-center gap-2 bg-[#B91C1C] hover:bg-[#991B1B] text-white py-3.5 rounded-full font-medium text-[15px] transition">
-              <LogOut size={18} />
-              Esci dall'account
+            <button className="
+              w-full
+              py-3.5
+              rounded-full
+              bg-[#B91C1C]
+              hover:bg-[#991B1B]
+              text-white
+              text-[15px]
+              font-medium
+              transition
+            ">
+              ↪️ Esci dall'account
             </button>
+
           </div>
         </div>
 
-        {/* TABS */}
-        <div className="flex justify-around text-[#64748B] border-b border-[#1E293B] pb-4 mb-10 text-[15px]">
-          <span className="cursor-pointer hover:text-white">Post (0)</span>
-          <span className="cursor-pointer hover:text-white">Commenti (0)</span>
-          <span className="cursor-pointer hover:text-white">Mi piace (0)</span>
+        {/* ==== TABS ==== */}
+        <div className="
+          flex items-center gap-12
+          border-b border-[#1C2333]
+          mt-12
+          pb-3
+          text-[15px]
+        ">
+          <button className="text-blue-400 font-semibold border-b-2 border-blue-500 pb-3">
+            Post (0)
+          </button>
+
+          <button className="text-neutral-400 hover:text-neutral-300 transition pb-3">
+            Commenti (0)
+          </button>
+
+          <button className="text-neutral-400 hover:text-neutral-300 transition pb-3">
+            Mi piace (1)
+          </button>
         </div>
 
-        {/* MESSAGGIO SE VUOTO */}
-        <p className="text-center text-[#94A3B8] text-[15px]">
+        <p className="text-center text-neutral-500 mt-12 text-[15px]">
           Non hai ancora pubblicato post.
         </p>
+
       </div>
     </AppShell>
   );
