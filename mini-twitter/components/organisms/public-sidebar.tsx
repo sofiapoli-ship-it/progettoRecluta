@@ -1,43 +1,50 @@
+"use client";
+
 import Link from "next/link";
 
 export function PublicSidebar() {
   return (
-    <aside className="hidden md:flex flex-col justify-between bg-[#030616] text-white h-screen w-[360px] px-10 py-12 border-r border-[#1F2937]">
-      {/* TOP */}
-      <div className="flex flex-col gap-10">
-
-        {/* Logo */}
-        <h1 className="text-3xl font-extrabold">MiniTwitter</h1>
-
-        {/* Testo introduttivo */}
-        <div>
-          <h2 className="text-2xl font-bold leading-tight">
-            Partecipa alla <br /> conversazione
-          </h2>
-        </div>
+    <aside
+      className="min-h-screen w-[380px] bg-[#030616] border-r border-[#1E2535] flex flex-col justify-between pl-24 pr-10 py-16"
+    >
+      {/* Contenitore interno (per controllare larghezza testo) */}
+      <div className="max-w-[260px]">
+        
+        {/* Titolo */}
+        <h2 className="text-4xl font-extrabold text-white leading-tight mb-12">
+          Partecipa alla<br/>conversazione
+        </h2>
 
         {/* Pulsanti */}
         <div className="flex flex-col gap-4">
           <Link
             href="/signup"
-            className="bg-[#1D9BF0] hover:bg-[#1A8CD8] transition text-white font-semibold py-3 rounded-full text-center"
+            className="bg-[#1DA1F2] hover:bg-[#1a8cd8] transition
+                       text-white font-semibold text-lg py-3 rounded-full
+                       text-center"
           >
             Crea account
           </Link>
 
           <Link
             href="/login"
-            className="bg-transparent border border-gray-500 hover:bg-gray-800 transition text-white font-semibold py-3 rounded-full text-center"
+            className="border border-[#3A4354] text-white
+                       text-lg py-3 rounded-full text-center
+                       hover:bg-[#111827]"
           >
             Accedi
           </Link>
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div className="flex flex-col text-gray-400 text-sm gap-1">
-        <Link href="#" className="hover:underline">Termini di servizio</Link>
-        <Link href="#" className="hover:underline">Informativa sulla privacy</Link>
+      {/* Link in basso */}
+      <div className="pb-8 text-sm ml-2">
+        <Link href="#" className="text-[#4B83FF] block">
+          Termini di servizio
+        </Link>
+        <Link href="#" className="text-[#4B83FF] block mt-2">
+          Informativa sulla privacy
+        </Link>
       </div>
     </aside>
   );

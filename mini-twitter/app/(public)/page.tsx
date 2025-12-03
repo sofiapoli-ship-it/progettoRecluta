@@ -1,59 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PostCard } from "@/components/organisms/post-card";
 import { PublicSidebar } from "@/components/organisms/public-sidebar";
+import { PostCard } from "@/components/organisms/post-card";
+import { PublicTopBar } from "@/components/organisms/public-topbar";
 
 export default function PublicHomePage() {
   const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {
-    setPosts([
-      {
-        id: 1,
-        username: "incognito",
-        handle: "@incognito",
-        time: "2025-11-29T12:04:00Z",
-        content: "testiamo un altro po' aaa",
-        likes: 2,
-        comments: 1,
-      },
-      {
-        id: 2,
-        username: "pasq",
-        handle: "@pasq",
-        time: "2025-11-28T20:12:00Z",
-        content: "elelea",
-        likes: 2,
-        comments: 2,
-      },
-    ]);
+    async function load() {
+      try {
+        const res = await fetch("https://api.twitter.server.jetop.com/api/posts");
+        const data = await res.json();
+        setPosts(data.items);
+      } catch (err) {
+        console.error("Errore fetch:", err);
+        setPosts([]);
+      }
+    }
+
+    load();
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-[#030616] flex">
+    <div className="min-h-screen w-full flex bg-[#030616] text-white">
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <PublicSidebar />
 
-      {/* Main content */}
-      <main className="flex-1 py-10 px-8">
-        <h1 className="text-white text-3xl font-bold mb-10">Discover</h1>
+      {/* MAIN FEED */}
+      <main className="flex-1 max-w-2xl">
 
-        <div className="max-w-2xl">
-          {posts.map((post) => (
-            <div key={post.id} className="mb-6">
-              <PostCard
-                username={post.username}
-                handle={post.handle}
-                time={post.time}
-                content={post.content}
-                likes={post.likes}
-                comments={post.comments}
-              />
-            </div>
+        {/* TOP BAR */}
+        <PublicTopBar />
+
+        {/* FEED */}
+        <div className="px-16 pt-4">
+          {posts.length === 0 && (
+            <p className="text-[#A2A8B3]">Nessun post disponibile.</p>
+          )}
+
+          {posts.map((p: any) => (
+            <PostCard
+              key={p.id}
+              username={p.users.username}
+              handle={`@${p.users.username}`}   // ⭐ aggiungi questo
+              content={p.content}
+              time={p.created_at}
+              likes={p.likes_count}
+              comments={p.comments_count}
+/>
           ))}
         </div>
+
       </main>
 
     </div>

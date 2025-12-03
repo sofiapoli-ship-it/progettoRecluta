@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
@@ -10,92 +10,92 @@ export default function SignupPage() {
   const [confirm, setConfirm] = useState("");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A0F1C] px-4">
-      <div className="bg-[#0F1629] border border-[#1f273a] rounded-xl p-8 w-full max-w-md text-white">
+    <div className="bg-[#0A0F1C] border border-[#1E2535]
+                    rounded-2xl w-[500px] px-10 py-12 shadow-lg">
 
-        {/* Logo */}
-        <h1 className="text-3xl font-bold text-center mb-6">MiniTwitter</h1>
+      {/* Titolo */}
+      <h1 className="text-center text-3xl font-bold mb-2">Crea un account</h1>
+      <p className="text-center text-[#A2ABB3] mb-10">
+        Inserisci i tuoi dati per registrarti
+      </p>
 
-        {/* Title */}
-        <h2 className="text-2xl font-semibold mb-1">Crea un nuovo account</h2>
-        <p className="text-neutral-400 mb-6 text-sm">
-          Registrati per iniziare a usare la piattaforma.
-        </p>
+      {/* FORM */}
+      <form className="flex flex-col gap-6">
 
         {/* USERNAME */}
-        <label className="text-sm font-medium text-neutral-300">Username</label>
-        <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="
-            w-full mt-1 mb-5 bg-[#111827] border border-[#1e2537]
-            rounded-lg px-3 py-2 text-neutral-200 outline-none
-            focus:border-blue-500
-          "
-          type="text"
-          placeholder="Il tuo username"
-        />
+        <div>
+          <label className="block mb-1 text-sm text-[#A2ABB3]">Username</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-[#0F172A]
+                       border border-[#1E2535] focus:outline-none 
+                       focus:border-[#1DA1F2] text-white"
+            placeholder="username"
+          />
+        </div>
 
         {/* EMAIL */}
-        <label className="text-sm font-medium text-neutral-300">Email</label>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="
-            w-full mt-1 mb-5 bg-[#111827] border border-[#1e2537]
-            rounded-lg px-3 py-2 text-neutral-200 outline-none
-            focus:border-blue-500
-          "
-          type="email"
-          placeholder="email@example.com"
-        />
+        <div>
+          <label className="block mb-1 text-sm text-[#A2ABB3]">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-[#0F172A]
+                       border border-[#1E2535] focus:outline-none 
+                       focus:border-[#1DA1F2] text-white"
+            placeholder="nome@esempio.com"
+          />
+        </div>
 
         {/* PASSWORD */}
-        <label className="text-sm font-medium text-neutral-300">Password</label>
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="
-            w-full mt-1 mb-5 bg-[#111827] border border-[#1e2537]
-            rounded-lg px-3 py-2 text-neutral-200 outline-none
-            focus:border-blue-500
-          "
-          type="password"
-          placeholder="••••••••"
-        />
+        <div>
+          <label className="block mb-1 text-sm text-[#A2ABB3]">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-[#0F172A]
+                       border border-[#1E2535] focus:outline-none 
+                       focus:border-[#1DA1F2] text-white"
+            placeholder="********"
+          />
+        </div>
 
-        {/* CONFIRM PASSWORD */}
-        <label className="text-sm font-medium text-neutral-300">Conferma password</label>
-        <input
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="
-            w-full mt-1 mb-6 bg-[#111827] border border-[#1e2537]
-            rounded-lg px-3 py-2 text-neutral-200 outline-none
-            focus:border-blue-500
-          "
-          type="password"
-          placeholder="••••••••"
-        />
+        {/* CONFERMA PASSWORD */}
+        <div>
+          <label className="block mb-1 text-sm text-[#A2ABB3]">Conferma password</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-[#0F172A]
+                       border border-[#1E2535] focus:outline-none 
+                       focus:border-[#1DA1F2] text-white"
+            placeholder="********"
+          />
+        </div>
 
-        {/* BUTTON */}
+        {/* BOTTONE */}
         <button
-          className="
-            w-full bg-[#3B82F6] hover:bg-[#2563EB] transition
-            text-white font-semibold py-2 rounded-full
-          "
+          type="submit"
+          className="w-full bg-[#1DA1F2] hover:bg-[#1a8cd8]
+                     transition text-white font-semibold
+                     py-3 rounded-full mt-4"
         >
-          Registrati
+          Crea account
         </button>
+      </form>
 
-        {/* LOGIN LINK */}
-        <p className="text-sm text-neutral-400 mt-6 text-center">
-          Hai già un account?{" "}
-          <Link href="/login" className="text-blue-400 hover:underline">
-            Accedi
-          </Link>
-        </p>
-      </div>
+      {/* LINK LOGIN */}
+      <p className="text-center text-[#A2ABB3] mt-6">
+        Hai già un account?{" "}
+        <Link href="/login" className="text-[#4B83FF]">
+          Accedi
+        </Link>
+      </p>
     </div>
   );
 }
