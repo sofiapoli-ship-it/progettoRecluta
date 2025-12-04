@@ -1,26 +1,44 @@
-// lib/api.ts
+// lib/api/api.ts
 
-export async function getPublicPosts() {
-  try {
-    const res = await fetch("https://api.twitter.server.jetop.com/api/posts", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
+const API_BASE_URL = "https://api.twitter.server.jetop.com/api";
 
-    if (!res.ok) {
-      console.error("Errore API:", res.status);
-      return [];
-    }
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-    const data = await res.json();
+export async function apiFetch<T>(
+  path: string,
+  options: {
+    method?: HttpMethod;
+    body?: unknown;
+    token?: string;
+  } = {}
+): Promise<T> {
+  const { method = "GET", body, token } = options;
 
-    // La risposta ha forma: { items: [...], count, limit, offset }
-    return data.items ?? [];
-  } catch (err) {
-    console.error("Errore nel fetch:", err);
-    return [];
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers,
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+
+  let data: any = null;
+  try {
+    data = await res.json();
+  } catch {
+    // niente body (es. 204) → lascio data = null
+  }
+
+  if (!res.ok) {
+    const message = data?.error || data?.message || `Errore API (${res.status})`;
+    throw new Error(message);
+  }
+
+  return data as T;
 }

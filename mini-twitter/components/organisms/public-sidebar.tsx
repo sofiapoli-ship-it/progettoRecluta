@@ -19,7 +19,7 @@ export function PublicSidebar() {
         <div className="flex flex-col gap-4">
           <Link
             href="/signup"
-            className="bg-[#1DA1F2] hover:bg-[#1a8cd8] transition
+            className="bg-[#217FE9] hover:bg-[#1a8cd8] transition
                        text-white font-semibold text-lg py-3 rounded-full
                        text-center"
           >

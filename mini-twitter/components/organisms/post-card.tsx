@@ -20,7 +20,7 @@ export function PostCard({ username, handle, time, content, likes, comments }: P
   });
 
   return (
-    <div className="py-4 border-b border-white/5">
+    <div className="py-4 border-b border-[#1E2535]">
 
       <div className="flex items-start gap-3">
 

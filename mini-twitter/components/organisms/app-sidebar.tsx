@@ -1,13 +1,36 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Pencil, Home, Heart, User, LogOut } from "lucide-react";
+import { me } from "@/lib/api/auth/me";
 
 type Props = {
-  active?: "home" | "likes" | "profile" | null; // ⭐ SUPPORTA NULL
+  active?: "home" | "likes" | "profile" | null;
 };
 
 export function AppSidebar({ active = null }: Props) {
+  const [user, setUser] = useState<{ username: string; email: string } | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const profile = await me(token);
+      if (profile && profile.user) {
+        setUser({
+          username: profile.user.username,
+          email: profile.user.email,
+        });
+      }
+    }
+
+    loadUser();
+  }, []);
+
   return (
-    <aside className="hidden md:flex flex-col justify-between h-screen w-[260px] px-6 py-8 border-r border-[#1F2937] bg-[#020617] text-white">
+    <aside className="hidden md:flex flex-col justify-between h-screen w-[260px] px-6 py-8 border-[#1F2937] bg-[#020617] text-white">
       
       {/* ---- TOP PART ---- */}
       <div className="flex flex-col gap-8">
@@ -16,8 +39,12 @@ export function AppSidebar({ active = null }: Props) {
 
         {/* User Info */}
         <div>
-          <p className="font-semibold">@sofia</p>
-          <p className="text-sm text-neutral-400">sofia@poli.com</p>
+          <p className="font-semibold">
+            @{user?.username ?? "loading"}
+          </p>
+          <p className="text-sm text-neutral-400">
+            {user?.email ?? "loading..."}
+          </p>
         </div>
 
         {/* New Post Button */}
@@ -31,7 +58,7 @@ export function AppSidebar({ active = null }: Props) {
         {/* Menu Links */}
         <nav className="flex flex-col gap-2 mt-2 text-neutral-300">
           <SidebarItem
-            href="/"
+            href="/home"
             label="Home"
             icon={<Home size={20} />}
             active={active === "home"}
@@ -76,17 +103,12 @@ function SidebarItem({ href, label, icon, active }: SidebarItemProps) {
         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition cursor-pointer
           ${
             active
-              ? "bg-[#0F1A2F] text-[#3B82F6]"   // ⭐ testo blu
+              ? "bg-[#0F1A2F] text-[#3B82F6]"
               : "text-white hover:bg-[#1E293B] hover:text-white"
           }
         `}
       >
-        {/* Icona: blu se attivo, bianca se non attivo */}
-        <span className={active ? "text-[#3B82F6]" : "text-white"}>
-          {icon}
-        </span>
-
-        {/* Testo */}
+        <span className={active ? "text-[#3B82F6]" : "text-white"}>{icon}</span>
         <span className={`text-base ${active ? "text-[#3B82F6]" : "text-white"}`}>
           {label}
         </span>
