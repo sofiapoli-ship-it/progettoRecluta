@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { login } from "@/lib/api/auth/login";
 import { useRouter } from "next/navigation";
+import { otpStatus } from "@/lib/api/auth/otp/status";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,47 +13,47 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
+ async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await login(username, password);
+  try {
+    const res = await login(username, password);
 
-      console.log("LOGIN RESPONSE:", res);
-
-      // ❌ Login fallito
-      if (!res.success) {
-        setError("Credenziali non valide.");
-        return;
-      }
-
-      // ✅ Caso 1 — Nessun OTP richiesto → token finale pronto
-      if (res.token && !res.requires_otp) {
-        localStorage.setItem("token", res.token);
-        router.push("/home");
-        return;
-      }
-
-      // ✅ Caso 2 — Serve OTP → abbiamo il temp_token
-      if (res.requires_otp && res.temp_token) {
-        localStorage.setItem("temp_token", res.temp_token);
-        router.push("/otp");
-        return;
-      }
-
-      // ❌ Caso imprevisto
-      setError("Errore inatteso. Riprova.");
-
-    } catch (err: any) {
-      console.error("Login error:", err);
-      setError("Errore durante il login.");
+    if (!res.success || !res.temp_token) {
+      setError("Credenziali non valide.");
+      return;
     }
-  }
 
+    // Step 1 — salva temp_token
+    localStorage.setItem("temp_token", res.temp_token);
+
+    // Step 2 — prova a verificare lo stato OTP
+    const status = await otpStatus(res.temp_token);
+
+    // CASO A → il backend risponde 200 → OTP attivo
+    if (status && status.enabled === true) {
+      router.push("/otp");
+      return;
+    }
+
+    // CASO B → il backend risponde 200 ma OTP disattivo
+    if (status && status.enabled === false) {
+      router.push("/otp/setup");
+      return;
+    }
+
+    // CASO C → status == null → probabilmente 401 → OTP NON ATTIVO
+    router.push("/otp/setup");
+    return;
+
+  } catch (err) {
+    console.error("Login error:", err);
+    setError("Errore durante il login.");
+  }
+}
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen">
-
       {/* BOX LOGIN */}
       <div className="flex flex-1 justify-center items-center px-6 md:px-20">
         <div className="bg-[#0E1424] border border-[#1F2937] rounded-2xl 

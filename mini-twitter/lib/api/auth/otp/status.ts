@@ -1,15 +1,18 @@
-// lib/api/auth/otp/status.ts
-
-export async function otpStatus(token: string) {
+export async function otpStatus(tempToken: string) {
   try {
-    const res = await fetch("https://api.twitter.server.jetop.com/api/auth/otp/status", {
+    const res = await fetch("http://localhost:4000/api/auth/otp/status", {
       method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Authorization": `Bearer ${tempToken}`
+      }
     });
 
     if (!res.ok) return null;
-    return await res.json();
-  } catch {
+
+    return await res.json(); // { enabled: boolean }
+
+  } catch (err) {
+    console.error("OTP STATUS ERROR:", err);
     return null;
   }
 }

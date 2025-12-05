@@ -14,38 +14,24 @@ export default function OtpPage() {
     e.preventDefault();
     setError("");
 
-    // Recuperiamo il token temporaneo salvato dal login (fase 1)
-    const temp_token = localStorage.getItem("temp_token");
-
-    if (!temp_token) {
+    const tempToken = localStorage.getItem("temp_token");
+    if (!tempToken) {
       setError("Token temporaneo mancante. Effettua di nuovo il login.");
       return;
     }
 
-    try {
-      const result = await verifyOtp(temp_token, otp);
+    const result = await verifyOtp(tempToken, otp);
 
-      console.log("VERIFY OTP RESULT:", result);
-
-      // ❌ OTP errato
-      if (!result || !result.success || !result.token) {
-        setError("OTP non valido.");
-        return;
-      }
-
-      // 🔥 Salviamo il token finale JWT
-      localStorage.setItem("token", result.token);
-
-      // 🔥 Rimuoviamo il token temporaneo
-      localStorage.removeItem("temp_token");
-
-      // 👉 Reindirizzamento all'area privata
-      router.push("/home");
-
-    } catch (err: any) {
-      console.error("OTP verify error:", err);
-      setError("Errore durante la verifica OTP.");
+    if (!result || !result.success) {
+      setError("OTP non valido.");
+      return;
     }
+
+    // Salva token finale
+    localStorage.setItem("token", result.token);
+    localStorage.removeItem("temp_token");
+
+    router.push("/home");
   }
 
   return (
@@ -60,7 +46,7 @@ export default function OtpPage() {
           </h2>
 
           <p className="text-white/60 text-center mb-10 text-sm">
-            Inserisci il codice a 6 cifre da Google Authenticator
+            Inserisci il codice a 6 cifre generato dall'app Google Authenticator.
           </p>
 
           {error && (
@@ -69,7 +55,6 @@ export default function OtpPage() {
 
           <form onSubmit={handleVerify} className="flex flex-col gap-6">
 
-            {/* INPUT OTP */}
             <div>
               <label className="text-white text-sm">Codice OTP</label>
               <input
@@ -85,7 +70,6 @@ export default function OtpPage() {
               />
             </div>
 
-            {/* BOTTONE VERIFICA */}
             <button
               type="submit"
               className="mt-2 bg-[#217FE9] hover:bg-[#3a6fe0] transition 
@@ -95,7 +79,6 @@ export default function OtpPage() {
               Verifica e Accedi
             </button>
 
-            {/* TORNA INDIETRO */}
             <button
               type="button"
               onClick={() => router.push("/login")}
@@ -104,8 +87,8 @@ export default function OtpPage() {
             >
               Torna indietro
             </button>
-          </form>
 
+          </form>
         </div>
       </div>
     </div>

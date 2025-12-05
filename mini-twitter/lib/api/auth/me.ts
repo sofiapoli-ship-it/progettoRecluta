@@ -1,20 +1,14 @@
-// lib/api/auth/me.ts
-
 export async function me(token: string) {
   try {
-    const res = await fetch("https://api.twitter.server.jetop.com/api/auth/me", {
+    const res = await fetch("http://localhost:4000/api/auth/me", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Authorization": `Bearer ${token}` }
     });
 
-    if (!res.ok) {
-      console.error("Me API error:", res.status);
-      return null;
-    }
+    if (!res.ok) return null;
 
     return await res.json();
+
   } catch (err) {
     console.error("Me API failed:", err);
     return null;

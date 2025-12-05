@@ -1,18 +1,21 @@
-// lib/api/auth/otp/setup.ts
-
-export async function otpSetup(token: string) {
+export async function otpSetup(tempToken: string) {
   try {
-    const res = await fetch("https://api.twitter.server.jetop.com/api/auth/otp/setup", {
-      method: "POST",
+    const res = await fetch("http://localhost:4000/api/auth/otp/setup", {
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+        "Authorization": `Bearer ${tempToken}`
+      }
     });
 
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
+    if (!res.ok) {
+      console.error("OTP Setup error:", res.status);
+      return null;
+    }
+
+    return await res.json();  // { secret, otpauth_url }
+
+  } catch (err) {
+    console.error("OTP Setup crash:", err);
     return null;
   }
 }
