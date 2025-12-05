@@ -11,7 +11,7 @@ export * from "./auth/me";
 export * from "./auth/otp/setup";
 export * from "./auth/otp/status";
 
-// POSTS (se già creati)
+// POSTS 
 export * from "./posts/get-feed";
 export * from "./posts/create";
 export * from "./posts/like";
