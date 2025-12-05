@@ -31,7 +31,6 @@ export default function SignupPage() {
       return;
     }
 
-    // 👉 NIENTE token per ora, andiamo al login pubblico
     router.push("/login");
 
   } catch (err: any) {

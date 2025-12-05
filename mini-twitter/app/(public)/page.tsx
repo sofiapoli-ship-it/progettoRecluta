@@ -5,7 +5,7 @@ import { PublicSidebar } from "@/components/organisms/public-sidebar";
 import { PostCard } from "@/components/organisms/post-card";
 import { PublicTopBar } from "@/components/organisms/public-topbar";
 
-import { getFeed } from "@/lib/api/posts/get-feed"; // ⭐ Usa la nuova API centralizzata
+import { getFeed } from "@/lib/api/posts/get-feed"; 
 
 export default function PublicHomePage() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -14,7 +14,7 @@ export default function PublicHomePage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getFeed(); // ⭐ API UNIFICATA
+        const data = await getFeed();
         setPosts(data ?? []);
       } catch (err) {
         console.error("Errore caricamento feed pubblico:", err);

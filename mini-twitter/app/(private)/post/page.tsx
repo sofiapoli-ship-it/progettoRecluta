@@ -31,7 +31,7 @@ export default function CreatePostPage() {
         return;
       }
 
-      // 🔥 Redirect alla Home dopo creazione
+      // Redirect alla Home dopo creazione
       router.push("/home");
 
     } catch (err: any) {

@@ -4,7 +4,7 @@ import { TopBar } from "./top-bar";
 
 type Props = {
   children: ReactNode;
-  active?: "home" | "likes" | "profile"; // ❗ niente null
+  active?: "home" | "likes" | "profile"; 
   title?: string;
 };
 

@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 // Mock provvisori
 const mockUser = {
   username: "sofia",
-  bio: "Amo la tecnologia, lo studio e i progetti ✨",
+  bio: "",
   createdAt: "2024-09-10T08:00:00Z",
 };
 
@@ -25,9 +25,6 @@ const mockPosts = [
 export default function UserProfilePage() {
   const { username } = useParams();
 
-  // 🔥 QUI LA COSA IMPORTANTE
-  // active deve essere SEMPRE uno dei 3 valori possibili,
-  // per la pagina profilo → "profile"
   return (
     <AppShell active="profile" title="Profilo">
       <div className="bg-[#0D1220] border border-[#1f2937] rounded-xl p-6 max-w-[650px] mx-auto">
