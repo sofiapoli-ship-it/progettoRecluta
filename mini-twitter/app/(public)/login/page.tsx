@@ -21,29 +21,30 @@ export default function LoginPage() {
 
       console.log("LOGIN RESPONSE:", res);
 
+      // ❌ Login fallito
       if (!res.success) {
         setError("Credenziali non valide.");
         return;
       }
 
-      // 🔥 Caso 1: NON serve l’OTP → abbiamo già il token finale
-      if (!res.requires_otp && res.token) {
+      // ✅ Caso 1 — Nessun OTP richiesto → token finale pronto
+      if (res.token && !res.requires_otp) {
         localStorage.setItem("token", res.token);
         router.push("/home");
         return;
       }
 
-      // 🔥 Caso 2: L'utente DEVE inserire OTP
+      // ✅ Caso 2 — Serve OTP → abbiamo il temp_token
       if (res.requires_otp && res.temp_token) {
         localStorage.setItem("temp_token", res.temp_token);
         router.push("/otp");
         return;
       }
 
-      // Qualsiasi altra condizione è anomala
+      // ❌ Caso imprevisto
       setError("Errore inatteso. Riprova.");
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Login error:", err);
       setError("Errore durante il login.");
     }
@@ -53,7 +54,7 @@ export default function LoginPage() {
     <div className="flex flex-col md:flex-row w-full min-h-screen">
 
       {/* BOX LOGIN */}
-      <div className="flex justify-center items-center md:w-1/2 p-10 mx-auto">
+      <div className="flex flex-1 justify-center items-center px-6 md:px-20">
         <div className="bg-[#0E1424] border border-[#1F2937] rounded-2xl 
                         p-12 w-full max-w-[480px]">
 

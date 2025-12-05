@@ -4,9 +4,9 @@ export type Post = {
   id: string;
   content: string;
   created_at: string;
-  likes_count: number;
-  comments_count: number;
-  user: {
+  user_id: string;
+  users: {
+    id: string;
     username: string;
   };
 };
@@ -25,8 +25,9 @@ export async function getFeed(): Promise<Post[]> {
 
     const data = await res.json();
 
-    if (Array.isArray(data)) return data;
-    if (data.items && Array.isArray(data.items)) return data.items;
+    // lo swagger per /posts torna qualcosa tipo { items: [...] }
+    if (Array.isArray(data)) return data as Post[];
+    if (data.items && Array.isArray(data.items)) return data.items as Post[];
 
     return [];
   } catch (error) {

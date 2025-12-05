@@ -1,10 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/organisms/app-shell";
+import { createPost } from "@/lib/api/posts/create";
 
 export default function CreatePostPage() {
   const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const router = useRouter();
+
+  async function handlePublish() {
+    setError("");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Devi effettuare il login per pubblicare un post.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await createPost(token, content);
+
+      if (!res.success) {
+        setError("Errore nella pubblicazione del post.");
+        return;
+      }
+
+      // 🔥 Redirect alla Home dopo creazione
+      router.push("/home");
+
+    } catch (err: any) {
+      console.error("Errore creazione post:", err);
+      setError(err.message || "Errore durante la pubblicazione.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <AppShell active="home" title="Crea un nuovo post">
@@ -14,6 +50,11 @@ export default function CreatePostPage() {
         <p className="text-neutral-400 mb-6">
           Condividi i tuoi pensieri con la community
         </p>
+
+        {/* ERROR MESSAGE */}
+        {error && (
+          <p className="text-red-400 mb-4 font-medium">{error}</p>
+        )}
 
         {/* Post box container */}
         <div className="bg-[#0b1120] border border-[#1f2937] rounded-xl p-6">
@@ -37,14 +78,15 @@ export default function CreatePostPage() {
           {/* Publish button */}
           <div className="flex justify-end">
             <button
-              disabled={content.trim().length === 0}
+              onClick={handlePublish}
+              disabled={loading || content.trim().length === 0}
               className="
                 px-5 py-2 rounded-lg 
                 bg-blue-600 text-white font-medium 
                 disabled:opacity-40 disabled:cursor-not-allowed
               "
             >
-              Pubblica
+              {loading ? "Pubblico..." : "Pubblica"}
             </button>
           </div>
         </div>

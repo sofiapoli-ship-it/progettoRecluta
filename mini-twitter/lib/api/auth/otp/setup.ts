@@ -1,15 +1,18 @@
 // lib/api/auth/otp/setup.ts
 
-import { apiFetch } from "../../../api";
+export async function otpSetup(token: string) {
+  try {
+    const res = await fetch("https://api.twitter.server.jetop.com/api/auth/otp/setup", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-export type OtpSetupResponse = {
-  secret: string;
-  otpauth_url: string;
-};
-
-export async function getOtpSetup(token: string): Promise<OtpSetupResponse> {
-  return apiFetch<OtpSetupResponse>("/auth/otp/setup", {
-    method: "GET",
-    token,
-  });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }

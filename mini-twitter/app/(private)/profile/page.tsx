@@ -1,16 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/organisms/app-shell";
+import { me } from "@/lib/api/auth/me";
+import Link from "next/link";
 
-const mockMyUser = {
-  username: "sofia",
-  email: "sofia@poli.com",
-  bio: "",
-  createdAt: "2024-09-10T00:00:00Z",
+type UserProfile = {
+  username: string;
+  email: string;
+  bio?: string | null;
+  created_at?: string;
 };
 
 export default function ProfilePage() {
-  const user = mockMyUser;
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const response = await me(token);
+
+        if (response?.user) {
+          setUser({
+            username: response.user.username,
+            email: response.user.email,
+            bio: response.user.bio ?? null,
+            created_at: response.user.created_at ?? null,
+          });
+        }
+      } catch (err) {
+        console.error("Errore caricamento profilo:", err);
+      }
+    }
+
+    loadUser();
+  }, []);
+
+  // Mostra UI "loading..." finché i dati non arrivano
+  const profile = user ?? {
+    username: "loading...",
+    email: "loading...",
+    bio: null,
+    created_at: "",
+  };
 
   return (
     <AppShell active="profile" title="Profilo">
@@ -38,7 +73,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-1">
               <span className="text-neutral-400 text-[14px]">Username</span>
               <span className="text-neutral-100 font-medium text-[16px]">
-                @{user.username}
+                @{profile.username}
               </span>
             </div>
 
@@ -46,7 +81,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-1">
               <span className="text-neutral-400 text-[14px]">Email</span>
               <span className="text-neutral-100 font-medium text-[16px]">
-                {user.email}
+                {profile.email}
               </span>
             </div>
 
@@ -54,8 +89,8 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-1">
               <span className="text-neutral-400 text-[14px]">Bibliografia/Bio</span>
 
-              {user.bio ? (
-                <span className="text-neutral-100">{user.bio}</span>
+              {profile.bio ? (
+                <span className="text-neutral-100">{profile.bio}</span>
               ) : (
                 <span className="text-neutral-500 italic">
                   Nessuna bio aggiunta.{" "}
@@ -71,19 +106,23 @@ export default function ProfilePage() {
           {/* BOTTONI */}
           <div className="flex flex-col gap-4 mt-10">
 
-            <button className="
-              w-full
-              py-3.5
-              rounded-full
-              bg-[#3B82F6]
-              hover:bg-[#2F6ADF]
-              text-white
-              text-[15px]
-              font-medium
-              transition
-            ">
-              ✏️ Modifica profilo
+            <Link href="/profile/edit">
+            <button
+              className="
+                w-full
+                py-3.5
+                rounded-full
+                bg-[#3B82F6]
+                hover:bg-[#2F6ADF]
+                text-white
+                text-[15px]
+                font-medium
+                transition
+              "
+            >
+            ✏️ Modifica profilo
             </button>
+          </Link>
 
             <button className="
               w-full

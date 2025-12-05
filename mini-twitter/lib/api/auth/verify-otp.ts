@@ -1,20 +1,31 @@
 // lib/api/auth/verify-otp.ts
 
-import { apiFetch } from "../../api";
+export async function verifyOtp(temp_token: string, otp: string) {
+  try {
+    const res = await fetch("https://api.twitter.server.jetop.com/api/auth/verify-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        temp_token,
+        otp,
+      }),
+    });
 
-export type VerifyOtpResponse = {
-  success: boolean;
-  token?: string;  // token finale JWT
-  user?: {
-    id: number;
-    username: string;
-    email: string;
-  };
-};
+    if (!res.ok) {
+      console.error("Verify OTP error:", res.status);
+      return { success: false };
+    }
 
-export async function verifyOtp(temp_token: string, otp_token: string) {
-  return apiFetch<VerifyOtpResponse>("/auth/verify-otp", {
-    method: "POST",
-    body: { temp_token, otp_token },
-  });
+    const data = await res.json();
+
+    return {
+      success: data.success ?? false,
+      token: data.token ?? null,
+    };
+  } catch (err) {
+    console.error("OTP verification failed:", err);
+    return { success: false };
+  }
 }

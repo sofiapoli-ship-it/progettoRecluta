@@ -17,23 +17,35 @@ export function AppSidebar({ active = null }: Props) {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const profile = await me(token);
-      if (profile && profile.user) {
-        setUser({
-          username: profile.user.username,
-          email: profile.user.email,
-        });
+      try {
+        const response = await me(token);
+
+        // Swagger restituisce: { user: { id, username, email } }
+        if (response?.user) {
+          setUser({
+            username: response.user.username,
+            email: response.user.email,
+          });
+        }
+      } catch (err) {
+        console.error("Errore caricamento /me:", err);
       }
     }
 
     loadUser();
   }, []);
 
+  function handleLogout() {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  }
+
   return (
     <aside className="hidden md:flex flex-col justify-between h-screen w-[260px] px-6 py-8 border-[#1F2937] bg-[#020617] text-white">
       
       {/* ---- TOP PART ---- */}
       <div className="flex flex-col gap-8">
+
         {/* Logo */}
         <h1 className="text-2xl font-extrabold text-white">MiniTwitter</h1>
 
@@ -81,7 +93,10 @@ export function AppSidebar({ active = null }: Props) {
       </div>
 
       {/* ---- BOTTOM PART ---- */}
-      <button className="flex items-center gap-2 text-neutral-400 hover:text-white transition">
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-2 text-neutral-400 hover:text-white transition"
+      >
         <LogOut size={18} /> Esci
       </button>
 

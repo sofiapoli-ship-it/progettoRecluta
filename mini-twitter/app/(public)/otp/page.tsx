@@ -14,28 +14,36 @@ export default function OtpPage() {
     e.preventDefault();
     setError("");
 
+    // Recuperiamo il token temporaneo salvato dal login (fase 1)
     const temp_token = localStorage.getItem("temp_token");
+
     if (!temp_token) {
       setError("Token temporaneo mancante. Effettua di nuovo il login.");
       return;
     }
 
     try {
-      const res = await verifyOtp(temp_token, otp);
+      const result = await verifyOtp(temp_token, otp);
 
-      if (!res?.success || !res.token) {
+      console.log("VERIFY OTP RESULT:", result);
+
+      // ❌ OTP errato
+      if (!result || !result.success || !result.token) {
         setError("OTP non valido.");
         return;
       }
 
-      // Salva token finale
-      localStorage.setItem("token", res.token);
+      // 🔥 Salviamo il token finale JWT
+      localStorage.setItem("token", result.token);
+
+      // 🔥 Rimuoviamo il token temporaneo
       localStorage.removeItem("temp_token");
 
+      // 👉 Reindirizzamento all'area privata
       router.push("/home");
 
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("OTP verify error:", err);
       setError("Errore durante la verifica OTP.");
     }
   }
