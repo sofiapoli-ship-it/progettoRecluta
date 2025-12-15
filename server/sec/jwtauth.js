@@ -1,50 +1,32 @@
-import passport from 'passport';
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import jwt from 'jsonwebtoken';
 import { supabase } from '../db/index.js';
 
-const SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-/**
- * Inizializza la strategia JWT
- */
-export function setupJwtAuth(passportInstance) {
-  passportInstance.use(
-    new JwtStrategy(
-      {
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: SECRET
-      },
-      async (payload, done) => {
-        try {
-          // Blocca token temporanei (OTP non completato)
-          if (payload.stage === 'otp') {
-            return done(null, false);
-          }
+export async function requireJwtAuth(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
 
-          const { data: user, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', payload.id)
-            .single();
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Token mancante' });
+    }
 
-          if (error || !user) {
-            return done(null, false);
-          }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
 
-          return done(null, user);
-        } catch (err) {
-          return done(err, false);
-        }
-      }
-    )
-  );
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, username, email, bio')
+      .eq('id', decoded.id)
+      .single();
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Utente non valido' });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Token non valido o scaduto' });
+  }
 }
-
-/**
- * Middleware JWT riutilizzabile
- */
-export const requireJwtAuth = passport.authenticate('jwt', {
-  session: false
-});
-
-export default passport;
