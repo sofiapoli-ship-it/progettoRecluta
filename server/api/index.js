@@ -1,42 +1,19 @@
- import { Router } from 'express';
-import passport from 'passport';
+import { Router } from 'express';
 
-// Router dei moduli
-import authRoutes from './auth.js';
-import userRoutes from './users.js';
-import postRoutes from './posts.js';
-import commentRoutes from './comments.js';
-import likeRoutes from './likes.js';
-import healthRoutes from './health.js';
+import authRouter from './auth.js';
+import healthRouter from './health.js';
+import postsRouter from './posts.js';
+import usersRouter from './users.js';
+import commentsRouter from './comments.js';
+import likesRouter from './likes.js';
 
-// Configurazione JWT centralizzata
-import { setupJwtAuth } from '../sec/jwtauth.js';
+const router = Router();
 
-// Inizializza la strategia JWT
-setupJwtAuth(passport);
+router.use('/auth', authRouter);
+router.use('/healthz', healthRouter);
+router.use('/posts', postsRouter);
+router.use('/users', usersRouter);
+router.use('/comments', commentsRouter);
+router.use('/likes', likesRouter);
 
-// Router principale dell'API
-const apiRouter = Router();
-
-// Inizializza passport per tutte le rotte API
-apiRouter.use(passport.initialize());
-
-// Health check (GET /healthz)
-apiRouter.use(healthRoutes);
-
-// Autenticazione
-apiRouter.use('/auth', authRoutes);
-
-// Utenti
-apiRouter.use('/users', userRoutes);
-
-// Post
-apiRouter.use('/posts', postRoutes);
-
-// Commenti
-apiRouter.use('/comments', commentRoutes);
-
-// Like
-apiRouter.use('/likes', likeRoutes);
-
-export default apiRouter;
+export default router;

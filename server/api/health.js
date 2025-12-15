@@ -3,10 +3,9 @@ import { Router } from 'express';
 const router = Router();
 
 /**
- * GET /healthz
- * Endpoint di health check del server
+ * GET /api/healthz
  */
-router.get('/healthz', (_req, res) => {
+router.get('/', (_req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
