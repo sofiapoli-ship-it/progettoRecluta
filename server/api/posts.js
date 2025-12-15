@@ -134,44 +134,44 @@ router.patch('/:id', requireJwtAuth, async (req, res) => {
    PATCH /posts/:id
 ========================= */
 router.patch('/:id', requireJwtAuth, async (req, res) => {
-  const postId = req.params.id;
-  const userId = req.user.id;
-  const { content } = req.body;
-
-  console.log('[PATCH /posts/:id]', { postId, userId, content });
-
-  if (!content || typeof content !== 'string') {
-    return res.status(400).json({ error: 'Content mancante o non valido' });
-  }
-
   try {
+    const postId = req.params.id;
+    const userId = req.user.id;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Content mancante' });
+    }
+
+    // 1️⃣ verifica che il post esista e sia dell’utente
+    const { data: post, error: fetchError } = await supabase
+      .from('posts')
+      .select('id')
+      .eq('id', postId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+
+    if (!post) {
+      return res.status(403).json({
+        error: 'Post non trovato o non autorizzato'
+      });
+    }
+
+    // 2️⃣ update vero
     const { data, error } = await supabase
       .from('posts')
       .update({ content })
       .eq('id', postId)
-      .eq('user_id', userId)
-      .select('*'); // niente .single()
+      .select()
+      .single();
 
-    console.log('[PATCH result]', { data, error });
+    if (error) throw error;
 
-    if (error) {
-      return res.status(500).json({
-        error: 'Errore Supabase',
-        details: error.message,
-        code: error.code
-      });
-    }
-
-    // 0 righe aggiornate => o non esiste o non sei l’autore
-    if (!data || data.length === 0) {
-      return res.status(404).json({
-        error: 'Post non trovato oppure non sei autorizzata a modificarlo'
-      });
-    }
-
-    return res.status(200).json(data[0]);
+    res.json(data);
   } catch (err) {
-    console.error('PATCH POST UNEXPECTED ERROR:', err);
-    return res.status(500).json({ error: 'Errore aggiornamento post' });
+    console.error('PATCH POST ERROR:', err);
+    res.status(500).json({ error: 'Errore aggiornamento post' });
   }
 });
