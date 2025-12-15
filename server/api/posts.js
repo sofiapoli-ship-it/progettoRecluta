@@ -4,19 +4,18 @@ import { requireJwtAuth } from '../sec/jwtauth.js';
 
 const router = Router();
 
+router.get('/_debug', async (_req, res) => {
+  const { data, error } = await supabase.from('posts').select('*').limit(1);
+  return res.json({ ok: !error, data, error });
+});
 /* =========================
-   GET ALL POSTS
+   GET /posts
 ========================= */
 router.get('/', async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select(`
-        id,
-        content,
-        created_at,
-        user_id
-      `)
+      .select('id, content, created_at, user_id', {count: 'exact'})
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -29,20 +28,39 @@ router.get('/', async (_req, res) => {
 });
 
 /* =========================
-   CREATE POST
+   GET /posts/:id
+========================= */
+router.get('/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    if (!data) return res.status(404).json({ error: 'Post non trovato' });
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore nel recupero del post' });
+  }
+});
+
+/* =========================
+   POST /posts
 ========================= */
 router.post('/', requireJwtAuth, async (req, res) => {
   try {
-    const { content } = req.body;
-
-    if (!content) {
-      return res.status(400).json({ error: 'Contenuto mancante' });
+    if (!req.body.content) {
+      return res.status(400).json({ error: 'Content mancante' });
     }
 
     const { data, error } = await supabase
       .from('posts')
       .insert({
-        content,
+        content: req.body.content,
         user_id: req.user.id
       })
       .select()
@@ -52,31 +70,62 @@ router.post('/', requireJwtAuth, async (req, res) => {
 
     res.status(201).json(data);
   } catch (err) {
-    console.error('CREATE POST ERROR:', err);
-    res.status(500).json({ error: 'Errore creazione post' });
+    console.error(err);
+    res.status(500).json({ error: 'Errore nella creazione del post' });
   }
 });
 
 /* =========================
-   DELETE POST
+   DELETE /posts/:id
 ========================= */
 router.delete('/:id', requireJwtAuth, async (req, res) => {
   try {
-    const { id } = req.params;
-
     const { error } = await supabase
       .from('posts')
       .delete()
-      .eq('id', id)
+      .eq('id', req.params.id)
       .eq('user_id', req.user.id);
 
     if (error) throw error;
 
-    res.json({ success: true });
+    res.status(204).send();
   } catch (err) {
-    console.error('DELETE POST ERROR:', err);
-    res.status(500).json({ error: 'Errore eliminazione post' });
+    console.error(err);
+    res.status(500).json({ error: 'Errore nella cancellazione' });
   }
 });
 
 export default router;
+
+/* =========================
+   PATCH /posts/:id
+========================= */
+router.patch('/:id', requireJwtAuth, async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Content mancante' });
+    }
+
+    // aggiorna solo se il post appartiene all’utente
+    const { data, error } = await supabase
+      .from('posts')
+      .update({ content })
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    if (!data) {
+      return res.status(403).json({ error: 'Non autorizzata' });
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error('PATCH POST ERROR:', err);
+    res.status(500).json({ error: 'Errore aggiornamento post' });
+  }
+});
