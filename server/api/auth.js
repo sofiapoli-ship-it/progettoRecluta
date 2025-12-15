@@ -34,8 +34,7 @@ router.post('/register', async (req, res, next) => {
       return res.status(409).json({ error: 'Username o email già registrati' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const otp = speakeasy.generateSecret({ length: 20 });
 
