@@ -1,4 +1,4 @@
-import { Router } from 'express';
+ import { Router } from 'express';
 import passport from 'passport';
 
 // Router dei moduli
@@ -9,33 +9,34 @@ import commentRoutes from './comments.js';
 import likeRoutes from './likes.js';
 import healthRoutes from './health.js';
 
-// Configurazione autenticazione JWT
-import { initializePassport } from '../auth/passport.js';
+// Configurazione JWT centralizzata
+import { setupJwtAuth } from '../sec/jwtauth.js';
 
-initializePassport(passport);
+// Inizializza la strategia JWT
+setupJwtAuth(passport);
 
 // Router principale dell'API
 const apiRouter = Router();
 
-// Inizializza passport su tutte le rotte API
+// Inizializza passport per tutte le rotte API
 apiRouter.use(passport.initialize());
 
-// Rotta di health check (GET /healthz)
+// Health check (GET /healthz)
 apiRouter.use(healthRoutes);
 
-// Rotte di autenticazione
+// Autenticazione
 apiRouter.use('/auth', authRoutes);
 
-// Rotte utenti
+// Utenti
 apiRouter.use('/users', userRoutes);
 
-// Rotte post
+// Post
 apiRouter.use('/posts', postRoutes);
 
-// Rotte commenti
+// Commenti
 apiRouter.use('/comments', commentRoutes);
 
-// Rotte like
+// Like
 apiRouter.use('/likes', likeRoutes);
 
 export default apiRouter;

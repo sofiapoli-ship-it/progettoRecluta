@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
-import { authenticateJWT } from '../auth/passport.js';
 import { requireFields } from '../utils.js';
+
+// ⬇middleware JWT centralizzato
+import { requireJwtAuth } from '../sec/jwtauth.js';
 
 const router = Router();
 
@@ -45,7 +47,7 @@ router.get('/', async (req, res, next) => {
  * POST /likes
  * Aggiunge un like a un post (idempotente)
  */
-router.post('/', authenticateJWT, async (req, res, next) => {
+router.post('/', requireJwtAuth, async (req, res, next) => {
   try {
     requireFields(req.body, ['post_id']);
 
@@ -88,7 +90,7 @@ router.post('/', authenticateJWT, async (req, res, next) => {
  * DELETE /likes
  * Rimuove un like da un post
  */
-router.delete('/', authenticateJWT, async (req, res, next) => {
+router.delete('/', requireJwtAuth, async (req, res, next) => {
   try {
     requireFields(req.body, ['post_id']);
 
