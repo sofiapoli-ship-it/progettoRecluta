@@ -1,60 +1,49 @@
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
 import { requireFields } from '../utils.js';
-
-// ⬇middleware JWT centralizzato
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
 const router = Router();
 
-/**
- * GET /likes
- * Recupera i like, con filtri opzionali o solo il conteggio
- */
-router.get('/', async (req, res, next) => {
+/* =========================
+   GET /likes
+========================= */
+router.get('/', async (req, res) => {
   try {
     const { post_id, user_id, count } = req.query;
 
-    let likeQuery = supabase
+    let query = supabase
       .from('likes')
-      .select('*', { count: 'exact' });
+      .select('id, user_id, post_id', { count: 'exact' });
 
-    if (post_id) {
-      likeQuery = likeQuery.eq('post_id', post_id);
-    }
+    if (post_id) query = query.eq('post_id', post_id);
+    if (user_id) query = query.eq('user_id', user_id);
 
-    if (user_id) {
-      likeQuery = likeQuery.eq('user_id', user_id);
-    }
-
-    const { data, error, count: total } = await likeQuery;
+    const { data, error, count: total } = await query;
     if (error) throw error;
 
     if (count === 'true') {
       return res.json({ count: total });
     }
 
-    res.json({
-      items: data,
-      count: total
-    });
+    res.json({ items: data, count: total });
   } catch (err) {
-    next(err);
+    console.error('GET LIKES ERROR:', err);
+    res.status(500).json({ error: 'Errore recupero likes' });
   }
 });
 
-/**
- * POST /likes
- * Aggiunge un like a un post (idempotente)
- */
-router.post('/', requireJwtAuth, async (req, res, next) => {
+/* =========================
+   POST /likes
+========================= */
+router.post('/', requireJwtAuth, async (req, res) => {
   try {
     requireFields(req.body, ['post_id']);
 
     const userId = req.user.id;
     const { post_id } = req.body;
 
-    // Controllo se il like esiste già
+    // controllo esistenza
     const { count, error: checkError } = await supabase
       .from('likes')
       .select('id', { count: 'exact', head: true })
@@ -64,17 +53,12 @@ router.post('/', requireJwtAuth, async (req, res, next) => {
     if (checkError) throw checkError;
 
     if (count > 0) {
-      // Like già presente → risposta idempotente
       return res.status(200).json({ ok: true });
     }
 
-    // Inserimento nuovo like
     const { data, error } = await supabase
       .from('likes')
-      .insert({
-        user_id: userId,
-        post_id
-      })
+      .insert({ user_id: userId, post_id })
       .select()
       .single();
 
@@ -82,15 +66,15 @@ router.post('/', requireJwtAuth, async (req, res, next) => {
 
     res.status(201).json(data);
   } catch (err) {
-    next(err);
+    console.error('POST LIKE ERROR:', err);
+    res.status(500).json({ error: 'Errore creazione like' });
   }
 });
 
-/**
- * DELETE /likes
- * Rimuove un like da un post
- */
-router.delete('/', requireJwtAuth, async (req, res, next) => {
+/* =========================
+   DELETE /likes
+========================= */
+router.delete('/', requireJwtAuth, async (req, res) => {
   try {
     requireFields(req.body, ['post_id']);
 
@@ -105,10 +89,10 @@ router.delete('/', requireJwtAuth, async (req, res, next) => {
 
     if (error) throw error;
 
-    // Idempotente: 204 anche se il like non esisteva
     res.status(204).send();
   } catch (err) {
-    next(err);
+    console.error('DELETE LIKE ERROR:', err);
+    res.status(500).json({ error: 'Errore rimozione like' });
   }
 });
 
