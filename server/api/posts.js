@@ -129,3 +129,49 @@ router.patch('/:id', requireJwtAuth, async (req, res) => {
     res.status(500).json({ error: 'Errore aggiornamento post' });
   }
 });
+
+/* =========================
+   PATCH /posts/:id
+========================= */
+router.patch('/:id', requireJwtAuth, async (req, res) => {
+  const postId = req.params.id;
+  const userId = req.user.id;
+  const { content } = req.body;
+
+  console.log('[PATCH /posts/:id]', { postId, userId, content });
+
+  if (!content || typeof content !== 'string') {
+    return res.status(400).json({ error: 'Content mancante o non valido' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .update({ content })
+      .eq('id', postId)
+      .eq('user_id', userId)
+      .select('*'); // niente .single()
+
+    console.log('[PATCH result]', { data, error });
+
+    if (error) {
+      return res.status(500).json({
+        error: 'Errore Supabase',
+        details: error.message,
+        code: error.code
+      });
+    }
+
+    // 0 righe aggiornate => o non esiste o non sei l’autore
+    if (!data || data.length === 0) {
+      return res.status(404).json({
+        error: 'Post non trovato oppure non sei autorizzata a modificarlo'
+      });
+    }
+
+    return res.status(200).json(data[0]);
+  } catch (err) {
+    console.error('PATCH POST UNEXPECTED ERROR:', err);
+    return res.status(500).json({ error: 'Errore aggiornamento post' });
+  }
+});
