@@ -3,19 +3,17 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import { supabase } from '../db/index.js';
-
-// USIAMO IL MIDDLEWARE DAL FILE sec/jwtauth.js
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
 const router = Router();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const SESSION_DURATION = '24h';
+const TOKEN_DURATION = '24h';
 
-/**
- * POST /auth/register
- * Crea un nuovo utente
- */
+/* ======================================================
+   REGISTER
+   POST /api/auth/register
+   ====================================================== */
 router.post('/register', async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
@@ -24,19 +22,23 @@ router.post('/register', async (req, res, next) => {
       return res.status(400).json({ error: 'Campi obbligatori mancanti' });
     }
 
-    const { data: duplicate } = await supabase
+    // Controllo se username o email esistono già
+    const { data: existing, error: checkError } = await supabase
       .from('users')
       .select('id')
-      .or(`username.eq.${username},email.eq.${email}`)
-      .single();
+      .or(`username.eq.${username},email.eq.${email}`);
 
-    if (duplicate) {
+    if (checkError) throw checkError;
+
+    if (existing.length > 0) {
       return res.status(409).json({ error: 'Username o email già registrati' });
     }
 
+    // Hash password (bcrypt gestisce il salt internamente)
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const otp = speakeasy.generateSecret({ length: 20 });
+    // OTP secret (opzionale)
+    const otpSecret = speakeasy.generateSecret({ length: 20 });
 
     const { data: user, error } = await supabase
       .from('users')
@@ -44,8 +46,7 @@ router.post('/register', async (req, res, next) => {
         username,
         email,
         password_hash: passwordHash,
-        salt,
-        otp_secret: otp.base32,
+        otp_secret: otpSecret.base32,
         bio: null
       })
       .select()
@@ -56,7 +57,7 @@ router.post('/register', async (req, res, next) => {
     const token = jwt.sign(
       { id: user.id },
       JWT_SECRET,
-      { expiresIn: SESSION_DURATION }
+      { expiresIn: TOKEN_DURATION }
     );
 
     res.status(201).json({
@@ -65,18 +66,17 @@ router.post('/register', async (req, res, next) => {
         username: user.username,
         email: user.email
       },
-      token,
-      otp_secret: otp.base32
+      token
     });
   } catch (err) {
     next(err);
   }
 });
 
-/**
- * POST /auth/login
- * Step 1: username + password
- */
+/* ======================================================
+   LOGIN
+   POST /api/auth/login
+   ====================================================== */
 router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
@@ -85,28 +85,25 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).json({ error: 'Credenziali mancanti' });
     }
 
-    const { data: user } = await supabase
+    const { data: user, error } = await supabase
       .from('users')
       .select('*')
       .eq('username', username)
       .single();
 
-    if (!user) {
+    if (error || !user) {
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
 
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) {
+    const passwordValid = await bcrypt.compare(password, user.password_hash);
+    if (!passwordValid) {
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
 
-    // 🔐 STEP OTP
+    // Se OTP attivo → step intermedio
     if (user.otp_secret) {
       const tempToken = jwt.sign(
-        {
-          id: user.id,
-          stage: 'otp' // ⬅️ coerente con jwtauth.js
-        },
+        { id: user.id, stage: 'otp' },
         JWT_SECRET,
         { expiresIn: '5m' }
       );
@@ -117,6 +114,7 @@ router.post('/login', async (req, res, next) => {
       });
     }
 
+    // Login normale
     const token = jwt.sign(
       {
         id: user.id,
@@ -124,7 +122,7 @@ router.post('/login', async (req, res, next) => {
         email: user.email
       },
       JWT_SECRET,
-      { expiresIn: SESSION_DURATION }
+      { expiresIn: TOKEN_DURATION }
     );
 
     res.json({
@@ -140,10 +138,10 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-/**
- * POST /auth/verify-otp
- * Step 2: verifica OTP
- */
+/* ======================================================
+   VERIFY OTP
+   POST /api/auth/verify-otp
+   ====================================================== */
 router.post('/verify-otp', async (req, res, next) => {
   try {
     const { temp_token, otp_token } = req.body;
@@ -152,12 +150,7 @@ router.post('/verify-otp', async (req, res, next) => {
       return res.status(400).json({ error: 'Dati OTP mancanti' });
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(temp_token, JWT_SECRET);
-    } catch {
-      return res.status(401).json({ error: 'Token OTP non valido o scaduto' });
-    }
+    const decoded = jwt.verify(temp_token, JWT_SECRET);
 
     if (decoded.stage !== 'otp') {
       return res.status(401).json({ error: 'Token non valido' });
@@ -191,7 +184,7 @@ router.post('/verify-otp', async (req, res, next) => {
         email: user.email
       },
       JWT_SECRET,
-      { expiresIn: SESSION_DURATION }
+      { expiresIn: TOKEN_DURATION }
     );
 
     res.json({
@@ -207,77 +200,10 @@ router.post('/verify-otp', async (req, res, next) => {
   }
 });
 
-/**
- * POST /auth/logout
- */
-router.post('/logout', (_req, res) => {
-  res.json({
-    success: true,
-    message: 'Logout effettuato'
-  });
-});
-
-/**
- * GET /auth/otp/setup
- */
-router.get('/otp/setup', requireJwtAuth, async (req, res, next) => {
-  try {
-    const { data: user } = await supabase
-      .from('users')
-      .select('otp_secret, email')
-      .eq('id', req.user.id)
-      .single();
-
-    let secret = user.otp_secret;
-
-    if (!secret) {
-      const generated = speakeasy.generateSecret({ length: 20 });
-      secret = generated.base32;
-
-      await supabase
-        .from('users')
-        .update({ otp_secret: secret })
-        .eq('id', req.user.id);
-    }
-
-    const otpUrl = speakeasy.otpauthURL({
-      secret,
-      label: `MiniTwitter:${user.email}`,
-      issuer: 'MiniTwitter',
-      encoding: 'base32'
-    });
-
-    res.json({
-      secret,
-      otpauth_url: otpUrl
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * GET /auth/otp/status
- */
-router.get('/otp/status', requireJwtAuth, async (req, res, next) => {
-  try {
-    const { data } = await supabase
-      .from('users')
-      .select('otp_secret')
-      .eq('id', req.user.id)
-      .single();
-
-    res.json({
-      otp_enabled: Boolean(data?.otp_secret)
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * GET /auth/me
- */
+/* ======================================================
+   ME
+   GET /api/auth/me
+   ====================================================== */
 router.get('/me', requireJwtAuth, (req, res) => {
   res.json({
     user: {
@@ -285,9 +211,16 @@ router.get('/me', requireJwtAuth, (req, res) => {
       username: req.user.username,
       email: req.user.email,
       bio: req.user.bio,
-      has_otp: !!req.user.otp_secret
+      has_otp: Boolean(req.user.otp_secret)
     }
   });
+});
+
+/* ======================================================
+   LOGOUT
+   ====================================================== */
+router.post('/logout', (_req, res) => {
+  res.json({ success: true });
 });
 
 export default router;
