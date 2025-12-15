@@ -7,6 +7,7 @@ import { requireJwtAuth } from '../sec/jwtauth.js';
 
 const router = Router();
 
+// TEST
 router.get('/_test', (_req, res) => {
   res.json({
     ok: true,
@@ -17,16 +18,9 @@ router.get('/_test', (_req, res) => {
 const JWT_SECRET = process.env.JWT_SECRET;
 const SESSION_DURATION = '24h';
 
-/* =====================================================
-   TEST ROUTE (DEBUG)
-===================================================== */
-router.get('/_test', (_req, res) => {
-  res.json({ ok: true, message: 'AUTH OK' });
-});
 
-/* =====================================================
-   REGISTER
-===================================================== */
+
+// ROUTE per registrazione
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -46,20 +40,20 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'Utente già esistente' });
     }
 
-    // 2️⃣ hash password (bcrypt gestisce il salt)
+    // hash password (bcrypt gestisce il salt)
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 3️⃣ OTP secret (opzionale, ma lo prepariamo)
+    // OTP secret (opzionale, ma lo prepariamo)
     const otp = speakeasy.generateSecret({ length: 20 });
 
-    // 4️⃣ inserimento utente
+    // inserimento utente
     const { data: user, error } = await supabase
       .from('users')
       .insert({
         username,
         email,
         password_hash: passwordHash,
-        otp_secret: otp.base32,
+        otp_secret: null,
         bio: null
       })
       .select()
