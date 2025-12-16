@@ -1,17 +1,12 @@
+//imports
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
+//consts
 const router = Router();
 
-router.get('/_debug', async (_req, res) => {
-  const { data, error } = await supabase.from('posts').select('*').limit(1);
-  return res.json({ ok: !error, data, error });
-});
-
-
-//POST ROUTES 
-
+////POST ROUTES////
 //POST /posts
 //creazione di un post
 router.post('/', requireJwtAuth, async (req, res) => {
@@ -38,9 +33,14 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
 });
 
-//GET ROUTES
+////GET ROUTES////
+//GET debug
+router.get('/_debug', async (_req, res) => {
+  const { data, error } = await supabase.from('posts').select('*').limit(1);
+  return res.json({ ok: !error, data, error });
+});
 
-//GET /posts
+//GET posts
 // avere la lista di tutti i post creati da tutti gli utenti
 router.get('/', async (_req, res) => {
   try {
@@ -58,29 +58,8 @@ router.get('/', async (_req, res) => {
   }
 });
 
-
-//GET /posts/:id
-//avere la lista di tutti i post creati da un utente
-router.get('/:id', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('id', req.params.id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    if (!data) return res.status(404).json({ error: 'Post non trovato' });
-
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Errore nel recupero del post' });
-  }
-});
-
-// GET COMMENTED POSTS
-// restituisce i post su cui un utente ha commentato
+//GET commented posts
+//avere i posts a cui un utente ha messo almeno un commento
 router.get('/commented-by/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -101,21 +80,39 @@ router.get('/commented-by/:userId', async (req, res) => {
 
     if (error) throw error;
 
-    // rimuove duplicati (se più commenti sullo stesso post)
-    const uniquePostsMap = new Map();
-
-    data.forEach(row => {
-      if (row.posts) {
-        uniquePostsMap.set(row.posts.id, row.posts);
-      }
-    });
-
-    const uniquePosts = Array.from(uniquePostsMap.values());
+    // rimuove duplicati (più commenti sullo stesso post)
+    const uniquePosts = [
+      ...new Map(
+        data
+          .filter(row => row.posts)
+          .map(row => [row.posts.id, row.posts])
+      ).values()
+    ];
 
     res.json(uniquePosts);
   } catch (err) {
     console.error('GET COMMENTED POSTS ERROR:', err);
     res.status(500).json({ error: 'Errore recupero post commentati' });
+  }
+});
+
+//GET post id
+//avere i post creati da un utente
+router.get('/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    if (!data) return res.status(404).json({ error: 'Post non trovato' });
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore nel recupero del post' });
   }
 });
 

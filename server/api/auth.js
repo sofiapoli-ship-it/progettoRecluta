@@ -6,13 +6,13 @@ import speakeasy from 'speakeasy';
 import { supabase } from '../db/index.js';
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
+//consts
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const SESSION_DURATION = '24h';
 
-
 ////ROUTES POSTS////
-//POST REGISTER
+//POST register
 //per aggiungere un utente nel database
 router.post('/register', async (req, res) => {
   try {
@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Campi obbligatori mancanti' });
     }
 
-    // 1️⃣ controllo duplicati
+    // controllo duplicati
     const { data: existing, error: checkError } = await supabase
       .from('users')
       .select('id')
@@ -33,10 +33,8 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'Utente già esistente' });
     }
 
-    // hash password (bcrypt gestisce il salt)
+    // hash password
     const passwordHash = await bcrypt.hash(password, 10);
-
-    // OTP secret (opzionale, ma lo prepariamo)
     const otp = speakeasy.generateSecret({ length: 20 });
 
     // inserimento utente
@@ -54,7 +52,7 @@ router.post('/register', async (req, res) => {
 
     if (error) throw error;
 
-    // 5️⃣ JWT
+    // JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
       JWT_SECRET,
@@ -76,7 +74,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-//POST LOGIN
+//POST login
 //per effettuare il login ossia ricevere il token che permetterà tutte le operazioni protette da token
 router.post('/login', async (req, res) => {
   try {
@@ -129,7 +127,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-//POST OTP
+//POST otp
 router.post('/verify-otp', async (req, res) => {
   try {
     const { temp_token, otp_token } = req.body;
@@ -178,9 +176,8 @@ router.post('/logout', (_req, res) => {
 
 export default router;
 
-
 ////ROUTES GETS////
-//GET TEST
+//GET test
 //verificare che postman funzioni
 router.get('/_test', (_req, res) => {
   res.json({
@@ -189,7 +186,7 @@ router.get('/_test', (_req, res) => {
   });
 });
 
-//GET ME
+//GET me
 //ottenere le informazioni di un utente registrato
 router.get('/me', requireJwtAuth, (req, res) => {
   res.json({

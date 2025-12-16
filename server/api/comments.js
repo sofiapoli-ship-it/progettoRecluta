@@ -1,45 +1,14 @@
+//import
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
-
-// middleware JWT centralizzato
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
+//consts
 const router = Router();
 
-/**
- * GET /comments
- * Legge i commenti (opzionalmente filtrati per post)
- */
-router.get('/', async (req, res, next) => {
-  try {
-    const { post_id, user_id } = req.query;
-
-    let query = supabase
-      .from('comments')
-      .select('id, content, created_at, user_id, post_id, users(username)')
-      .order('created_at', { ascending: false });
-
-    if (post_id) {
-      query = query.eq('post_id', post_id);
-    }
-
-    if (user_id) {
-      query = query.eq('user_id', user_id);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-
-    res.json(data);
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * POST /comments
- * Crea un commento (utente autenticato)
- */
+//POST ROUTES
+//POST comment
+//mettere un commento a un determinato post
 router.post('/', requireJwtAuth, async (req, res, next) => {
   try {
     const { content, post_id } = req.body;
@@ -67,10 +36,39 @@ router.post('/', requireJwtAuth, async (req, res, next) => {
   }
 });
 
-/**
- * DELETE /comments/:id
- * Cancella un commento (solo autore)
- */
+////GET ROUTES////
+//GET comments
+//se postId fornito -> lista commenti al post
+//se userId fornito -> lista commenti fatti a qualsiasi post da user
+router.get('/', async (req, res, next) => {
+  try {
+    const { post_id, user_id } = req.query;
+
+    let query = supabase
+      .from('comments')
+      .select('id, content, created_at, user_id, post_id, users(username)')
+      .order('created_at', { ascending: false });
+
+    if (post_id) {
+      query = query.eq('post_id', post_id);
+    }
+
+    if (user_id) {
+      query = query.eq('user_id', user_id);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+////DELETE ROUTES////
+//DELETE comment
+//rimuovere un commento a un determinato post
 router.delete('/:id', requireJwtAuth, async (req, res, next) => {
   try {
     const commentId = req.params.id;

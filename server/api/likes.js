@@ -1,40 +1,14 @@
+//imports
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
 import { requireFields } from '../utils.js';
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
+//consts
 const router = Router();
 
-/* =========================
-   GET /likes
-========================= */
-router.get('/', async (req, res) => {
-  try {
-    const { post_id, user_id, count } = req.query;
-
-    let query = supabase
-      .from('likes')
-      .select('id, user_id, post_id', { count: 'exact' });
-
-    if (post_id) query = query.eq('post_id', post_id);
-    if (user_id) query = query.eq('user_id', user_id);
-
-    const { data, error, count: total } = await query;
-    if (error) throw error;
-
-    if (count === 'true') {
-      return res.json({ count: total });
-    }
-
-    res.json({ items: data, count: total });
-  } catch (err) {
-    console.error('GET LIKES ERROR:', err);
-    res.status(500).json({ error: 'Errore recupero likes' });
-  }
-});
-
-//POST ROUTES
-//POST LIKE
+////POST ROUTES////
+//POST like
 //per mettere un like a un post
 //uno stesso utente non può mettere più di una volta like a uno stesso post
 router.post('/', requireJwtAuth, async (req, res) => {
@@ -72,9 +46,37 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
 });
 
+////GET ROUTES////
+//GET likes
+// se postId -> lista likes a quel post
+// se userId -> lista posts a cui user ha messo like
+router.get('/', async (req, res) => {
+  try {
+    const { post_id, user_id, count } = req.query;
 
-//DELETE ROUTES
-//DELETE LIKE 
+    let query = supabase
+      .from('likes')
+      .select('id, user_id, post_id', { count: 'exact' });
+
+    if (post_id) query = query.eq('post_id', post_id);
+    if (user_id) query = query.eq('user_id', user_id);
+
+    const { data, error, count: total } = await query;
+    if (error) throw error;
+
+    if (count === 'true') {
+      return res.json({ count: total });
+    }
+
+    res.json({ items: data, count: total });
+  } catch (err) {
+    console.error('GET LIKES ERROR:', err);
+    res.status(500).json({ error: 'Errore recupero likes' });
+  }
+});
+
+////DELETE ROUTES////
+//DELETE like 
 //Per rimuovere il like da un post
 router.delete('/', requireJwtAuth, async (req, res) => {
   try {
