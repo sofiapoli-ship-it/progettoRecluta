@@ -59,6 +59,31 @@ router.get('/', async (_req, res) => {
 });
 
 //GET commented posts
+// GET /posts
+// lista di post (opzionalmente filtrati per autore)
+router.get('/', async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    let query = supabase
+      .from('posts')
+      .select('id, content, created_at, user_id')
+      .order('created_at', { ascending: false });
+
+    if (user_id) {
+      query = query.eq('user_id', user_id);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    console.error('GET POSTS ERROR:', err);
+    res.status(500).json({ error: 'Errore nel recupero dei post' });
+  }
+});
+
 //avere i posts a cui un utente ha messo almeno un commento
 router.get('/commented-by/:userId', async (req, res) => {
   try {
