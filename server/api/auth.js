@@ -205,7 +205,7 @@ router.get('/otp/setup', requireJwtAuth, async (req, res) => {
     const userId = req.user.id;
 
     const secret = speakeasy.generateSecret({
-      length: 20,
+      length: 16,
       name: `MiniTwitter (${req.user.email})`
     });
 
