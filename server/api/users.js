@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { supabase } from '../db/index.js';
 import { paginated } from '../utils.js';
 import { requireJwtAuth } from '../sec/jwtauth.js'; //JWT
+import bcrypt from 'bcrypt';
 
 //consts
 const router = Router();
@@ -111,7 +112,8 @@ router.get('/:id/likes', async (req, res, next) => {
 });
 
 //PATCH ROUTES
-//PATCH id
+//PATCH username, email, bio
+//per cambiare una, due o tutte e tre 
 router.patch('/:id', requireJwtAuth, async (req, res, next) => {
   try {
     const targetUserId = req.params.id;
@@ -153,6 +155,57 @@ router.patch('/:id', requireJwtAuth, async (req, res, next) => {
     }
 
     res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+//PATCH user password
+//cambio di password
+router.patch('/:id/password', requireJwtAuth, async (req, res, next) => {
+  try {
+    const targetUserId = req.params.id;
+    const loggedUserId = req.user.id;
+
+    if (targetUserId !== loggedUserId) {
+      return res.status(403).json({
+        error: 'Non autorizzato'
+      });
+    }
+
+    const { old_password, new_password } = req.body;
+
+    if (!old_password || !new_password) {
+      return res.status(400).json({
+        error: 'Password mancanti'
+      });
+    }
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('password_hash')
+      .eq('id', targetUserId)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    const match = await bcrypt.compare(old_password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Password attuale errata' });
+    }
+
+    const newHash = await bcrypt.hash(new_password, 10);
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ password_hash: newHash })
+      .eq('id', targetUserId);
+
+    if (updateError) throw updateError;
+
+    res.json({ success: true });
   } catch (err) {
     next(err);
   }
