@@ -176,6 +176,75 @@ router.post('/enable-otp', requireJwtAuth, async (req, res) => {
   }
 });
 
+//POST verify otp
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { temp_token, otp_token } = req.body ?? {};
+    if (!temp_token || !otp_token) {
+      return res.status(400).json({ error: 'temp_token o otp_token mancanti' });
+    }
+
+    const decoded = jwt.verify(temp_token, JWT_SECRET);
+    if (decoded.stage !== 'otp') {
+      return res.status(401).json({ error: 'Token non valido' });
+    }
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, username, otp_secret')
+      .eq('id', decoded.id)
+      .single();
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Utente non valido' });
+    }
+    if (!user.otp_secret) {
+      return res.status(400).json({ error: 'OTP non attivo su questo account' });
+    }
+
+    const valid = speakeasy.totp.verify({
+      secret: user.otp_secret,
+      encoding: 'base32',
+      token: String(otp_token).trim(),
+      window: 2
+    });
+
+    if (!valid) {
+      return res.status(401).json({ error: 'OTP errato' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: SESSION_DURATION }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error('VERIFY OTP ERROR:', err);
+    res.status(500).json({ error: 'Errore OTP' });
+  }
+});
+
+//POST disable otp
+router.post('/disable-otp', requireJwtAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const { error } = await supabase
+      .from('users')
+      .update({ otp_secret: null })
+      .eq('id', userId);
+
+    if (error) throw error;
+
+    res.json({ otp_enabled: false });
+  } catch (err) {
+    console.error('DISABLE OTP ERROR:', err);
+    res.status(500).json({ error: 'Errore disattivazione OTP' });
+  }
+});
+
 //POST LOGOUT
 //scordarsi del token
 router.post('/logout', (_req, res) => {
