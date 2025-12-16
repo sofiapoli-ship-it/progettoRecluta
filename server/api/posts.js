@@ -168,10 +168,9 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// =========================
-// PATCH /posts/:id
-// modifica post
-// =========================
+////PATCH ROUTES////
+//PATCH post
+//per modificare il contenuto di un post
 router.patch('/:id', requireJwtAuth, async (req, res) => {
   try {
     const { content } = req.body;

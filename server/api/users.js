@@ -111,7 +111,7 @@ router.get('/:id/likes', async (req, res, next) => {
   }
 });
 
-//PATCH ROUTES
+////PATCH ROUTES////
 //PATCH username, email, bio
 //per cambiare una, due o tutte e tre 
 router.patch('/:id', requireJwtAuth, async (req, res, next) => {

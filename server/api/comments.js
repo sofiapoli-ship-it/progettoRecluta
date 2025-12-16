@@ -6,7 +6,7 @@ import { requireJwtAuth } from '../sec/jwtauth.js';
 //consts
 const router = Router();
 
-//POST ROUTES
+////POST ROUTES////
 //POST comment
 //mettere un commento a un determinato post
 router.post('/', requireJwtAuth, async (req, res, next) => {

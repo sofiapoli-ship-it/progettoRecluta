@@ -4,7 +4,7 @@ import { Router } from 'express';
 //consts
 const router = Router();
 
-//GET ROUTES
+////GET ROUTES////
 //GET health
 router.get('/', (_req, res) => {
   res.status(200).json({

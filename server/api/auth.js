@@ -11,7 +11,7 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const SESSION_DURATION = '24h';
 
-////ROUTES POSTS////
+///POST ROUTES////
 //POST register
 //per aggiungere un utente nel database
 router.post('/register', async (req, res) => {
@@ -253,7 +253,7 @@ router.post('/logout', (_req, res) => {
 
 export default router;
 
-////ROUTES GETS////
+////GET ROUTES////
 //GET test
 //verificare che postman funzioni
 router.get('/_test', (_req, res) => {
