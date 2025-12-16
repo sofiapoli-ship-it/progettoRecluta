@@ -33,9 +33,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-/* =========================
-   POST /likes
-========================= */
+//POST ROUTES
+//POST LIKE
+//per mettere un like a un post
+//uno stesso utente non può mettere più di una volta like a uno stesso post
 router.post('/', requireJwtAuth, async (req, res) => {
   try {
     requireFields(req.body, ['post_id']);
@@ -71,9 +72,10 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
 });
 
-/* =========================
-   DELETE /likes
-========================= */
+
+//DELETE ROUTES
+//DELETE LIKE 
+//Per rimuovere il like da un post
 router.delete('/', requireJwtAuth, async (req, res) => {
   try {
     requireFields(req.body, ['post_id']);

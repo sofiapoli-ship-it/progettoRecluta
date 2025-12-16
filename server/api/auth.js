@@ -1,3 +1,4 @@
+//import
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -6,21 +7,13 @@ import { supabase } from '../db/index.js';
 import { requireJwtAuth } from '../sec/jwtauth.js';
 
 const router = Router();
-
-// TEST
-router.get('/_test', (_req, res) => {
-  res.json({
-    ok: true,
-    message: 'AUTH ROUTER FUNZIONA'
-  });
-});
-
 const JWT_SECRET = process.env.JWT_SECRET;
 const SESSION_DURATION = '24h';
 
 
-
-// ROUTE per registrazione
+////ROUTES POSTS////
+//POST REGISTER
+//per aggiungere un utente nel database
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -83,9 +76,8 @@ router.post('/register', async (req, res) => {
   }
 });
 
-/* =====================================================
-   LOGIN
-===================================================== */
+//POST LOGIN
+//per effettuare il login ossia ricevere il token che permetterà tutte le operazioni protette da token
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -109,7 +101,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
 
-    // se OTP attivo → step successivo
+    // otp deve essere attivo per passare allo step successivo
     if (user.otp_secret) {
       const tempToken = jwt.sign(
         { id: user.id, stage: 'otp' },
@@ -137,9 +129,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-/* =====================================================
-   VERIFY OTP
-===================================================== */
+//POST OTP
 router.post('/verify-otp', async (req, res) => {
   try {
     const { temp_token, otp_token } = req.body;
@@ -180,9 +170,27 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
-/* =====================================================
-   ME
-===================================================== */
+//POST LOGOUT
+//scordarsi del token
+router.post('/logout', (_req, res) => {
+  res.json({ success: true });
+});
+
+export default router;
+
+
+////ROUTES GETS////
+//GET TEST
+//verificare che postman funzioni
+router.get('/_test', (_req, res) => {
+  res.json({
+    ok: true,
+    message: 'AUTH ROUTER FUNZIONA'
+  });
+});
+
+//GET ME
+//ottenere le informazioni di un utente registrato
 router.get('/me', requireJwtAuth, (req, res) => {
   res.json({
     user: {
@@ -194,11 +202,3 @@ router.get('/me', requireJwtAuth, (req, res) => {
   });
 });
 
-/* =====================================================
-   LOGOUT
-===================================================== */
-router.post('/logout', (_req, res) => {
-  res.json({ success: true });
-});
-
-export default router;

@@ -79,6 +79,46 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// GET COMMENTED POSTS
+// restituisce i post su cui un utente ha commentato
+router.get('/commented-by/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const { data, error } = await supabase
+      .from('comments')
+      .select(`
+        post_id,
+        posts (
+          id,
+          content,
+          created_at,
+          user_id
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // rimuove duplicati (se più commenti sullo stesso post)
+    const uniquePostsMap = new Map();
+
+    data.forEach(row => {
+      if (row.posts) {
+        uniquePostsMap.set(row.posts.id, row.posts);
+      }
+    });
+
+    const uniquePosts = Array.from(uniquePostsMap.values());
+
+    res.json(uniquePosts);
+  } catch (err) {
+    console.error('GET COMMENTED POSTS ERROR:', err);
+    res.status(500).json({ error: 'Errore recupero post commentati' });
+  }
+});
+
 
 
 

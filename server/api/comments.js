@@ -12,19 +12,22 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
   try {
-    const postId = req.query.post_id;
+    const { post_id, user_id } = req.query;
 
     let query = supabase
       .from('comments')
-      .select('id, content, created_at, user_id, users(username)')
+      .select('id, content, created_at, user_id, post_id, users(username)')
       .order('created_at', { ascending: false });
 
-    if (postId) {
-      query = query.eq('post_id', postId);
+    if (post_id) {
+      query = query.eq('post_id', post_id);
+    }
+
+    if (user_id) {
+      query = query.eq('user_id', user_id);
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
 
     res.json(data);
