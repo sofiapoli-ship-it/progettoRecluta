@@ -128,26 +128,60 @@ router.post('/login', async (req, res) => {
 });
 
 //POST otp
+router.post('/enable-otp', requireJwtAuth, async (req, res) => {
+  try {
+    const otp = speakeasy.generateSecret({
+      length: 16,
+      name: `MiniTwitter (${req.user.email})`
+    });
+
+    const { error } = await supabase
+      .from('users')
+      .update({ otp_secret: otp.base32 }) // SOLO base32
+      .eq('id', req.user.id);
+
+    if (error) throw error;
+
+    res.json({
+      otp_enabled: true,
+      secret: otp.base32,        // 👉 da inserire MANUALMENTE in Google
+      otpauth_url: otp.otpauth_url
+    });
+  } catch (err) {
+    console.error('ENABLE OTP ERROR:', err);
+    res.status(500).json({ error: 'Errore attivazione OTP' });
+  }
+});
+
 router.post('/verify-otp', async (req, res) => {
   try {
     const { temp_token, otp_token } = req.body;
 
+    if (!temp_token || !otp_token) {
+      return res.status(400).json({ error: 'Token mancanti' });
+    }
+
     const decoded = jwt.verify(temp_token, JWT_SECRET);
+
     if (decoded.stage !== 'otp') {
       return res.status(401).json({ error: 'Token non valido' });
     }
 
-    const { data: user } = await supabase
+    const { data: user, error } = await supabase
       .from('users')
-      .select('*')
+      .select('id, username, otp_secret')
       .eq('id', decoded.id)
       .single();
+
+    if (error || !user || !user.otp_secret) {
+      return res.status(401).json({ error: 'Utente non valido' });
+    }
 
     const valid = speakeasy.totp.verify({
       secret: user.otp_secret,
       encoding: 'base32',
       token: otp_token,
-      window: 2
+      window: 1
     });
 
     if (!valid) {
@@ -161,7 +195,6 @@ router.post('/verify-otp', async (req, res) => {
     );
 
     res.json({ token });
-
   } catch (err) {
     console.error('OTP ERROR:', err);
     res.status(500).json({ error: 'Errore OTP' });
