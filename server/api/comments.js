@@ -66,6 +66,50 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+////PATCH ROUTES////
+//PATCH comment
+//modifica un commento
+router.patch('/:id', requireJwtAuth, async (req, res, next) => {
+  try {
+    const commentId = req.params.id;
+    const userId = req.user.id;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Content mancante' });
+    }
+
+    // verifica che il commento esista ed è dell’utente
+    const { data: comment, error: fetchError } = await supabase
+      .from('comments')
+      .select('id, user_id')
+      .eq('id', commentId)
+      .single();
+
+    if (fetchError || !comment) {
+      return res.status(404).json({ error: 'Commento non trovato' });
+    }
+
+    if (comment.user_id !== userId) {
+      return res.status(403).json({ error: 'Non autorizzato' });
+    }
+
+    // update vero e proprio
+    const { data, error } = await supabase
+      .from('comments')
+      .update({ content })
+      .eq('id', commentId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
 ////DELETE ROUTES////
 //DELETE comment
 //rimuovere un commento a un determinato post
