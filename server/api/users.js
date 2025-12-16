@@ -1,19 +1,25 @@
+//imports
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
 import { paginated } from '../utils.js';
+import { requireJwtAuth } from '../sec/jwtauth.js'; //JWT
 
-// middleware JWT centralizzato
-import { requireJwtAuth } from '../sec/jwtauth.js';
-
+//consts
 const router = Router();
+const PUBLIC_USER_FIELDS = 'id, username, email, bio, created_at'; // Campi pubblici dell’utente non esporre password o segreti
 
-// Campi pubblici dell’utente (mai esporre password o segreti)
-const PUBLIC_USER_FIELDS = 'id, username, email, bio, created_at';
+////POST ROUTES////
+//POST user
+//Non consentito: la creazione avviene tramite /auth/register
+router.post('/', (_req, res) => {
+  res.status(403).json({
+    error: 'Operazione non consentita. Usa /auth/register'
+  });
+});
 
-/**
- * GET /users
- * Lista utenti con paginazione e ricerca opzionale
- */
+//GET ROUTES
+//GET users
+//lista di tutti gli utenti registrati
 router.get('/', async (req, res, next) => {
   try {
     const { limit, offset } = paginated(req);
@@ -45,10 +51,8 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-/**
- * GET /users/:id
- * Recupera un singolo utente
- */
+//GET id
+//informazioni utente
 router.get('/:id', async (req, res, next) => {
   try {
     const userId = req.params.id;
@@ -71,10 +75,8 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-/**
- * GET /users/:id/likes
- * Post a cui l’utente ha messo like
- */
+//GET liked posts
+//lista dei posts a cui l'untente ha messo like
 router.get('/:id/likes', async (req, res, next) => {
   try {
     const userId = req.params.id;
@@ -108,20 +110,9 @@ router.get('/:id/likes', async (req, res, next) => {
   }
 });
 
-/**
- * POST /users
- * Non consentito: la creazione avviene tramite /auth/register
- */
-router.post('/', (_req, res) => {
-  res.status(403).json({
-    error: 'Operazione non consentita. Usa /auth/register'
-  });
-});
-
-/**
- * PATCH /users/:id
- * Aggiorna profilo utente (solo proprietario)
- */
+//PATCH ROUTES
+//PATCH id
+//
 router.patch('/:id', requireJwtAuth, async (req, res, next) => {
   try {
     const targetUserId = req.params.id;
@@ -165,10 +156,9 @@ router.patch('/:id', requireJwtAuth, async (req, res, next) => {
   }
 });
 
-/**
- * DELETE /users/:id
- * Cancella account (solo proprietario)
- */
+////DELETE ROUTES////
+//DELETE id
+//eliminare utente
 router.delete('/:id', requireJwtAuth, async (req, res, next) => {
   try {
     const targetUserId = req.params.id;
