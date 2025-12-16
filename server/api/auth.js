@@ -199,3 +199,32 @@ router.get('/me', requireJwtAuth, (req, res) => {
   });
 });
 
+//GET otp setup
+router.get('/otp/setup', requireJwtAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const secret = speakeasy.generateSecret({
+      length: 20,
+      name: `MiniTwitter (${req.user.email})`
+    });
+
+    const { error } = await supabase
+      .from('users')
+      .update({
+        otp_secret: secret.base32
+      })
+      .eq('id', userId);
+
+    if (error) throw error;
+
+    res.json({
+      otp_enabled: true,
+      secret: secret.base32,
+      otpauth_url: secret.otpauth_url
+    });
+  } catch (err) {
+    console.error('OTP SETUP ERROR:', err);
+    res.status(500).json({ error: 'Errore setup OTP' });
+  }
+});
