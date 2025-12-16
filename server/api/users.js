@@ -72,6 +72,43 @@ router.get('/:id', async (req, res, next) => {
 });
 
 /**
+ * GET /users/:id/likes
+ * Post a cui l’utente ha messo like
+ */
+router.get('/:id/likes', async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+
+    const { data, error } = await supabase
+      .from('likes')
+      .select(`
+        post_id,
+        posts (
+          id,
+          content,
+          created_at,
+          user_id
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // estrai solo i post
+    const likedPosts = data.map(like => like.posts);
+
+    res.json({
+      user_id: userId,
+      items: likedPosts,
+      count: likedPosts.length
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * POST /users
  * Non consentito: la creazione avviene tramite /auth/register
  */

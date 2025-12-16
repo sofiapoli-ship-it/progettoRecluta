@@ -8,49 +8,12 @@ router.get('/_debug', async (_req, res) => {
   const { data, error } = await supabase.from('posts').select('*').limit(1);
   return res.json({ ok: !error, data, error });
 });
-/* =========================
-   GET /posts
-========================= */
-router.get('/', async (_req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('id, content, created_at, user_id', {count: 'exact'})
-      .order('created_at', { ascending: false });
 
-    if (error) throw error;
 
-    res.json(data);
-  } catch (err) {
-    console.error('GET POSTS ERROR:', err);
-    res.status(500).json({ error: 'Errore nel recupero dei post' });
-  }
-});
+//POST ROUTES 
 
-/* =========================
-   GET /posts/:id
-========================= */
-router.get('/:id', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('id', req.params.id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    if (!data) return res.status(404).json({ error: 'Post non trovato' });
-
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Errore nel recupero del post' });
-  }
-});
-
-/* =========================
-   POST /posts
-========================= */
+//POST /posts
+//creazione di un post
 router.post('/', requireJwtAuth, async (req, res) => {
   try {
     if (!req.body.content) {
@@ -75,9 +38,56 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
 });
 
-/* =========================
-   DELETE /posts/:id
-========================= */
+//GET ROUTES
+
+//GET /posts
+// avere la lista di tutti i post creati da tutti gli utenti
+router.get('/', async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id, content, created_at, user_id', {count: 'exact'})
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    console.error('GET POSTS ERROR:', err);
+    res.status(500).json({ error: 'Errore nel recupero dei post' });
+  }
+});
+
+
+//GET /posts/:id
+//avere la lista di tutti i post creati da un utente
+router.get('/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    if (!data) return res.status(404).json({ error: 'Post non trovato' });
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore nel recupero del post' });
+  }
+});
+
+
+
+
+
+
+//DELETE ROUTES
+
+//DELETE /posts/:id
+//eliminazione di un post
 router.delete('/:id', requireJwtAuth, async (req, res) => {
   try {
     const { error } = await supabase
@@ -97,9 +107,9 @@ router.delete('/:id', requireJwtAuth, async (req, res) => {
 
 export default router;
 
-/* =========================
-   PATCH /posts/:id
-========================= */
+//PATCH ROUTE
+
+//modifica del contenuto di un post
 router.patch('/:id', requireJwtAuth, async (req, res) => {
   try {
     const { content } = req.body;
@@ -130,9 +140,9 @@ router.patch('/:id', requireJwtAuth, async (req, res) => {
   }
 });
 
-/* =========================
-   PATCH /posts/:id
-========================= */
+
+//PATCH /posts/:id
+// modifica del contenuto di un post
 router.patch('/:id', requireJwtAuth, async (req, res) => {
   try {
     const postId = req.params.id;
