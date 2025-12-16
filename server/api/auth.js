@@ -127,7 +127,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-//POST anable otp
+//POST enable otp
 router.post('/enable-otp', requireJwtAuth, async (req, res) => {
   try {
     const userId = req.user.id;
