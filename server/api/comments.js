@@ -1,4 +1,4 @@
-//import
+//imports
 import { Router } from 'express';
 import { supabase } from '../db/index.js';
 import { requireJwtAuth } from '../sec/jwtauth.js';
