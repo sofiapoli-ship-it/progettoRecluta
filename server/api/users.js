@@ -17,7 +17,7 @@ router.post('/', (_req, res) => {
   });
 });
 
-//GET ROUTES
+////GET ROUTES////
 //GET users
 //lista di tutti gli utenti registrati
 router.get('/', async (req, res, next) => {
@@ -112,7 +112,6 @@ router.get('/:id/likes', async (req, res, next) => {
 
 //PATCH ROUTES
 //PATCH id
-//
 router.patch('/:id', requireJwtAuth, async (req, res, next) => {
   try {
     const targetUserId = req.params.id;
@@ -124,9 +123,12 @@ router.patch('/:id', requireJwtAuth, async (req, res, next) => {
       });
     }
 
+    const { username, email, bio } = req.body;
+
     const updates = {};
-    if (req.body.username) updates.username = req.body.username;
-    if (req.body.bio) updates.bio = req.body.bio;
+    if (username) updates.username = username;
+    if (email) updates.email = email;
+    if (bio !== undefined) updates.bio = bio;
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({
